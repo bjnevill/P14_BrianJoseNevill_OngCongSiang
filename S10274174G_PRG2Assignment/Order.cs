@@ -95,7 +95,7 @@ namespace S10274174G_PRG2Assignment
             Customer = customer;
             Restaurant = restaurant;
         }
-        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer? specialOffer, Customer customer, Restaurant restaurant)
+        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant)
         {
             OrderId = id;
             OrderDateTime = dateTime;
