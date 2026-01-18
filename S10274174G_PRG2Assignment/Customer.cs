@@ -8,5 +8,51 @@ namespace S10274174G_PRG2Assignment
 {
     internal class Customer
     {
+        private string emailAdress;
+        private string customerName;
+        private List<Order> orders;
+
+        public string EmailAdress
+        {
+            get { return emailAdress; }
+            set { emailAdress = value; }
+        }
+        public string CustomerName
+        {
+            get { return customerName; }
+            set { customerName = value; }
+        }
+        public List<Order> Orders
+        {
+            get { return orders; }
+            set { orders = value; }
+        }
+        public Customer(string email, string name)
+        {
+            EmailAdress = email;
+            CustomerName = name;
+            Orders = new List<Order>();
+        }
+        public void AddOrder(Order order)
+        {
+            Orders.Add(order);
+        }
+        public void DisplayOrders()
+        {
+            Console.WriteLine($"Customer: {CustomerName} (Email: {EmailAdress})");
+            foreach (Order order in Orders)
+            {
+                Console.WriteLine($"Order ID: {order.OrderId}, Total: {order.OrderTotal}, Status: {order.OrderStaus}");
+            }
+        }
+        public bool RemoveOrder(Order order)
+        {
+            return Orders.Remove(order);
+        }
+
+        public override string ToString()
+        {
+            return $"{CustomerName} (Email: {EmailAdress}) - {Orders.Count} orders";
+        }
     }
 }
