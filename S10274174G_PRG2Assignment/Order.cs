@@ -17,7 +17,7 @@ namespace S10274174G_PRG2Assignment
         private string orderPaymentMethod;
         private bool orderPaid;
         private List<OrderedFoodItem> orderedFoodItems;
-        private SpecialOffer specialOffer;
+        private SpecialOffer? specialOffer;
         private Customer customer;
         private Restaurant restaurant;
 
@@ -66,7 +66,7 @@ namespace S10274174G_PRG2Assignment
             get { return orderedFoodItems; }
             set { orderedFoodItems = value; }
         }
-        public SpecialOffer SpecialOffer
+        public SpecialOffer? SpecialOffer
         {
             get { return specialOffer; }
             set { specialOffer = value; }
@@ -95,7 +95,7 @@ namespace S10274174G_PRG2Assignment
             Customer = customer;
             Restaurant = restaurant;
         }
-        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant)
+        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer? specialOffer, Customer customer, Restaurant restaurant)
         {
             OrderId = id;
             OrderDateTime = dateTime;

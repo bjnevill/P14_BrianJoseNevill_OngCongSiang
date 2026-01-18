@@ -42,7 +42,7 @@ namespace S10274174G_PRG2Assignment
             Console.WriteLine($"Customer: {CustomerName} (Email: {EmailAdress})");
             foreach (Order order in Orders)
             {
-                Console.WriteLine($"Order ID: {order.OrderId}, Total: {order.OrderTotal}, Status: {order.OrderStaus}");
+                Console.WriteLine($"Order ID: {order.OrderId}, Total: {order.OrderTotal}, Status: {order.OrderStatus}");
             }
         }
         public bool RemoveOrder(Order order)
