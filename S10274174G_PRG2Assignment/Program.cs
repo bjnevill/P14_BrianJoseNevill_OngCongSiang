@@ -44,7 +44,17 @@ do
     }
     else if (choice == 2)
     {
+        Console.WriteLine("All Orders");
+        Console.WriteLine("==========");
+        Console.WriteLine($"{"Order ID",-12}{"Customer",-14}{"Restaurant",-17}{"Delivery Date/Time",-22}{"Amount",-10}{"Status",-10}");
+        Console.WriteLine($"{"--------",-12}{"----------",-14}{"-------------",-17}{"------------------",-22}{"------",-10}{"---------",-10}");
 
+
+        foreach (Order order in orders.Values)
+        {
+            Console.WriteLine(order.ToString());
+        }
+        Console.WriteLine("");
     }
     else if (choice == 3)
     {
