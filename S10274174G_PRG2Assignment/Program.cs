@@ -28,13 +28,19 @@ do
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Convert.ToInt32(Console.ReadLine());
+    Console.WriteLine("");
     if (choice == 0)
     {
         Console.WriteLine("Exiting...");
     }
     else if (choice == 1)
     {
-
+        Console.WriteLine("All Restaurants and Menu Items");
+        Console.WriteLine("==============================");
+        foreach (Restaurant restaurant in restaurants.Values)
+        {
+            restaurant.DisplayMenus();
+        }
     }
     else if (choice == 2)
     {
@@ -60,7 +66,6 @@ do
     {
         Console.WriteLine("Inavlid Option");
     }
-    Console.WriteLine("");
 
 } while (choice != 0);
 
