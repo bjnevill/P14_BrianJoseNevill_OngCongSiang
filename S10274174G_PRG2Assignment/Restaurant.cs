@@ -57,10 +57,9 @@ namespace S10274174G_PRG2Assignment
 
         public void DisplayOrders()
         {
-            Console.WriteLine($"Restaurant: {RestaurantName} (ID: {RestaurantId})");
             foreach (Order order in Orders)
             {
-                Console.WriteLine($"Order ID: {order.OrderId}, Total: {order.OrderTotal}, Status: {order.OrderStatus}");
+                Console.WriteLine(order.ToString());
             }
         }
 

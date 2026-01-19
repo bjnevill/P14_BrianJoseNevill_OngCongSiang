@@ -134,9 +134,11 @@ namespace S10274174G_PRG2Assignment
 
         public void DisplayOrderedFoodItems()
         {
-            Console.WriteLine($"Order ID: {OrderId}, DateTime: {OrderDateTime}, Total: ${OrderTotal}, Status: {OrderStatus}");
-            Console.WriteLine($"Delivery DateTime: {DeliveryDateTime}, Address: {DeliveryAddress}, Payment Method: {OrderPaymentMethod}, Paid: {OrderPaid}");
-            Console.WriteLine("Ordered Food Items:");
+            Console.WriteLine("All Orders");
+            Console.WriteLine("==========");
+            Console.WriteLine($"{"Order ID",-10}{"Customer",-16}{"Restaurant",-21}{"Delivery Date/Time",-22}{"Amount",-10}{"Status",-10}");
+            Console.WriteLine($"{"--------",-10}{"--------------",-16}{"-------------------",-21}{"---------------------",-22}{"--------",-10}{"----------",-10}");
+
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
                 Console.WriteLine($"{item.ItemName} - Qty: {item.QtyOrdered} - SubTotal: ${item.CalculateSubTotal()}");
@@ -145,7 +147,7 @@ namespace S10274174G_PRG2Assignment
 
         public override string ToString()
         {
-            return $"Order ID: {OrderId}, DateTime: {OrderDateTime}, Total: ${OrderTotal}, Status: {OrderStatus}, Delivery Address: {DeliveryAddress}";
+            return $"{OrderId,-12}{Customer.CustomerName,-14}{Restaurant.RestaurantName,-17}{DeliveryDateTime.ToString("dd/MM/yyyy HH:mm"),-22}${OrderTotal.ToString("0.00"),-9}{OrderStatus,-10}";
         }
     }   
 }
