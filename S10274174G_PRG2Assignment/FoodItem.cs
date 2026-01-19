@@ -51,7 +51,7 @@ namespace S10274174G_PRG2Assignment
 
         public override string ToString()
         {
-            return $"{ItemName} - {ItemDesc} - ${ItemPrice} - Customise: {Customise}";
+            return $"  - {ItemName}: {ItemDesc} - ${ItemPrice.ToString("0.00")}";
         }
     }
 }

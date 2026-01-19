@@ -74,10 +74,14 @@ namespace S10274174G_PRG2Assignment
         }
         public void DisplayMenus()
         {
-            Console.WriteLine($"Restaurant: {RestaurantName} (ID: {RestaurantId}) - Menus:");
+            Console.WriteLine($"Restaurant: {RestaurantName} ({RestaurantId})");
             foreach (Menu menu in Menus)
             {
-                Console.WriteLine(menu.ToString());
+                foreach (FoodItem item in menu.FoodItems)
+                {
+                    Console.WriteLine(item.ToString());
+                }
+                Console.WriteLine("");
             }
         }
 
