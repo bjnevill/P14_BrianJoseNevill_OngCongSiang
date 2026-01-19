@@ -81,10 +81,10 @@ namespace S10274174G_PRG2Assignment
             get { return restaurant; }
             set { restaurant = value; }
         }
-        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant)
+        public Order(int id, DateTime orderDateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant)
         {
             OrderId = id;
-            OrderDateTime = dateTime;
+            OrderDateTime = orderDateTime;
             OrderTotal = total;
             OrderStatus = status;
             DeliveryDateTime = deliveryDateTime;

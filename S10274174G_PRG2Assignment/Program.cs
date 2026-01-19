@@ -1,12 +1,5 @@
 ﻿
-
-
-
-
-
-
-
-
+using S10274174G_PRG2Assignment;
 
 
 
@@ -55,5 +48,7 @@ do
     {
         Console.WriteLine("Inavlid Option");
     }
+    Console.WriteLine("");
 
 } while (choice != 0);
+

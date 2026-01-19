@@ -33,6 +33,14 @@ namespace S10274174G_PRG2Assignment
             get { return customise; }
             set { customise = value; }
         }
+
+        public FoodItem(string name, string desc, double price)
+        {
+            ItemName = name;
+            ItemDesc = desc;
+            ItemPrice = price;
+        }
+
         public FoodItem(string name, string desc, double price, string customise)
         {
             ItemName = name;

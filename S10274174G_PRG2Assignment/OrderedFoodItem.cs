@@ -23,6 +23,11 @@ namespace S10274174G_PRG2Assignment
             set { subTotal = value; }
         }
 
+        public OrderedFoodItem(string name, string desc, double price, int qtyOrdered)
+            : base(name, desc, price)
+        {
+            QtyOrdered = qtyOrdered;
+        }
         public OrderedFoodItem(string name, string desc, double price, string customise, int qtyOrdered)
             : base(name, desc, price, customise)
         {
