@@ -149,5 +149,11 @@ namespace S10274174G_PRG2Assignment
         {
             return $"{OrderId,-12}{Customer.CustomerName,-14}{Restaurant.RestaurantName,-17}{DeliveryDateTime.ToString("dd/MM/yyyy HH:mm"),-22}${OrderTotal.ToString("0.00"),-9}{OrderStatus,-10}";
         }
+
+        public const string STATUS_PENDING = "Pending";
+        public const string STATUS_PREPARING = "Preparing";
+        public const string STATUS_CANCELLED = "Cancelled";
+        public const string STATUS_REJECTED = "Rejected";
+        public const string STATUS_DELIVERED = "Delivered";
     }   
 }
