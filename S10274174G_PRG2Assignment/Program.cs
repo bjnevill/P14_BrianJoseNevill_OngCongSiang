@@ -1,5 +1,6 @@
 ﻿
 using S10274174G_PRG2Assignment;
+using System.Security.Principal;
 
 Dictionary<string, Restaurant> restaurants = LoadRestaurants();
 Dictionary<string, FoodItem> foodItems = LoadFoodItems(restaurants);
@@ -58,7 +59,7 @@ do
     }
     else if (choice == 3)
     {
-
+        CreateNewOrder();
     }
     else if (choice == 4)
     {
@@ -179,10 +180,11 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
         string sdatetime = date + " " + time;
         string address = order[5];
         DateTime createdDateTime = Convert.ToDateTime(order[6]);
+        DateTime deliveryDateTime = Convert.ToDateTime(sdatetime);
         double totalAmount = Convert.ToDouble(order[7]);
         string status = order[8];
         bool paid;
-        if (status == "Cancelled")
+        if (status == "Cancelled" || status == "Rejected")
         {
             paid = false;
         }
@@ -190,9 +192,8 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
         {
             paid = true;
         }
-        DateTime datetime = Convert.ToDateTime(sdatetime);
         string[] items = split[1].Split('|');
-        Order order1 = new Order(orderID, datetime, totalAmount, status, createdDateTime, address, "unkown", paid, customers[email], restaurants[restaurantId]);
+        Order order1 = new Order(orderID, createdDateTime, totalAmount, status, deliveryDateTime, address, "unkown", paid, customers[email], restaurants[restaurantId],"-");
         for (int j = 0; j < items.Length; j++)
         {
             string[] item = items[j].Split(',');
@@ -217,5 +218,163 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
 
     return orders;
 
+}
+
+void CreateNewOrder()
+{
+    Console.WriteLine("Create New Order");
+    Console.WriteLine("================");
+    string email;
+    while (true)
+    {
+        Console.Write("Enter Customer Email: ");
+        email = Console.ReadLine();
+        if (customers.ContainsKey(email))
+        {
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid customer email");
+        }
+    }
+    string restaurantId;
+    while (true)
+    {
+        Console.Write("Enter Restaurant ID: ");
+        restaurantId = Console.ReadLine();
+        if (restaurants.ContainsKey(restaurantId))
+        {
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid Restaurant ID");
+        }
+    }
+    Console.Write("Enter Delivery Date (dd/mm/yyyy): ");
+    string date = Console.ReadLine();
+    Console.Write("Enter Delivery Time (hh:mm): ");
+    string time = Console.ReadLine();
+    Console.Write("Enter Delivery Address: ");
+    string address = Console.ReadLine();
+    Console.WriteLine("");
+    string sdatetime = date + " " + time;
+    DateTime deliveryDateTime = Convert.ToDateTime(sdatetime);
+
+
+    Console.WriteLine("Available Food Items:");
+    int num = 1;
+    foreach (FoodItem foodItem in restaurants[restaurantId].Menus[0].FoodItems)
+    {
+        Console.WriteLine($"{num}. {foodItem.ItemName} - ${foodItem.ItemPrice.ToString("0.00")}");
+        num += 1;
+    }
+
+
+    List<OrderedFoodItem> orderedFoodItems = new List<OrderedFoodItem>();
+    int itemNu;
+    int quantity;
+    while (true)
+    {
+        Console.Write("Enter item number (0 to finish): ");
+        itemNu = Convert.ToInt32(Console.ReadLine());
+        if (itemNu == 0)
+            break;
+        Console.Write("Enter quantity: ");
+        quantity = Convert.ToInt32(Console.ReadLine());
+        orderedFoodItems.Add(new OrderedFoodItem(restaurants[restaurantId].Menus[0].FoodItems[itemNu - 1].ItemName, restaurants[restaurantId].Menus[0].FoodItems[itemNu - 1].ItemDesc, restaurants[restaurantId].Menus[0].FoodItems[itemNu - 1].ItemPrice, quantity));
+    }
+
+    if (orderedFoodItems.Count == 0)
+    {
+        Console.WriteLine("No items selected. Order not created.");
+        return;
+    }
+
+    string requestChoice;
+    string specialRequest;
+    while (true)
+    {
+        Console.Write("Add special request? [Y/N]:");
+        requestChoice = Console.ReadLine();
+        if (requestChoice == "Y")
+        {
+            Console.Write("Please enter your special request: ");
+            specialRequest = Console.ReadLine();
+            break;
+        }
+        else if (requestChoice == "N")
+        {
+            specialRequest = "-";
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid Option");
+        }
+    }
+    double subtotal = 0;
+    foreach (OrderedFoodItem item in orderedFoodItems)
+    {
+        subtotal += item.CalculateSubTotal();
+    }
+    double total = subtotal + 5;
+    Console.WriteLine("");
+    Console.WriteLine($"Order total: ${subtotal.ToString("0.00")} + $5.00 (delivery) = ${total.ToString("0.00")}");
+    string paymentMethod;
+    string paymentOption;
+    while (true)
+    {
+        Console.Write("Proceed to payment? [Y/N]: ");
+        paymentOption = Console.ReadLine();
+        Console.WriteLine("");
+        if (paymentOption != "Y" && paymentOption != "N")
+        {
+            Console.WriteLine("Invalid Option");
+        }
+        else
+        {
+            break;
+        }
+    }
+    if (paymentOption == "Y")
+    {
+        while (true)
+        {
+            Console.Write("Payment method:\n[CC] Credit Card / [PP] PayPal / [CD] Cash on Delivery: ");
+            paymentMethod = Console.ReadLine();
+            if (paymentMethod == "CC" || paymentMethod == "PP" || paymentMethod == "CD")
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Invalid Option");
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("See you again!");
+        return;
+    }
+    int maxOrderId = 0;
+    foreach (Order o in orders.Values)
+    {
+        if (o.OrderId > maxOrderId)
+        {
+            maxOrderId = o.OrderId;
+        }
+    }
+
+    Order order = new Order(maxOrderId + 1, DateTime.Now, subtotal, "Pending", deliveryDateTime, address, paymentMethod, true, customers[email], restaurants[restaurantId], specialRequest);
+    restaurants[restaurantId].Orders.Enqueue(order);
+    customers[email].AddOrder(order);
+    orders[order.OrderId] = order;
+
+    Console.WriteLine("");
+    Console.WriteLine($"Order {order.OrderId} created successfully! Status: {order.OrderStatus}");
+    Console.WriteLine("");
 }
 
