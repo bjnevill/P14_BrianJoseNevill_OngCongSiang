@@ -134,7 +134,7 @@ do
     }
     else if (choice == 6)
     {
-
+        DeleteOrder(orders.Values.ToList(), refundStack);
     }
     else
     {
@@ -280,6 +280,81 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
     }
 
     return orders;
+
+    static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
+{
+    Console.WriteLine("Delete Order");
+    Console.WriteLine("============");
+
+    Console.Write("Enter Customer Email: ");
+    string email = Console.ReadLine().Trim();
+
+    // Find pending orders for customer
+    List<Order> pendingOrders = orderList
+        .Where(o => o.Customer.CustomerEmail.Equals(email, StringComparison.OrdinalIgnoreCase)
+                 && o.OrderStatus == Order.STATUS_PENDING)
+        .ToList();
+
+    if (pendingOrders.Count == 0)
+    {
+        Console.WriteLine("No pending orders found for this customer.");
+        return;
+    }
+
+    Console.WriteLine("\nPending Orders:");
+    foreach (Order o in pendingOrders)
+    {
+        Console.WriteLine(o.OrderId);
+    }
+
+    Console.Write("\nEnter Order ID: ");
+    if (!int.TryParse(Console.ReadLine(), out int orderId))
+    {
+        Console.WriteLine("Invalid Order ID.");
+        return;
+    }
+
+    Order selectedOrder = pendingOrders
+        .FirstOrDefault(o => o.OrderId == orderId);
+
+    if (selectedOrder == null)
+    {
+        Console.WriteLine("Order ID not found.");
+        return;
+    }
+
+    // Display order details
+    Console.WriteLine($"\nCustomer: {selectedOrder.Customer.CustomerName}");
+    Console.WriteLine("Ordered Items:");
+
+    int count = 1;
+    foreach (OrderedFoodItem item in selectedOrder.OrderedFoodItems)
+    {
+        Console.WriteLine($"{count}. {item.ItemName} - {item.QtyOrdered}");
+        count++;
+    }
+
+    Console.WriteLine($"Delivery date/time: {selectedOrder.DeliveryDateTime:dd/MM/yyyy HH:mm}");
+    Console.WriteLine($"Total Amount: ${selectedOrder.OrderTotal:0.00}");
+    Console.WriteLine($"Order Status: {selectedOrder.OrderStatus}");
+
+    Console.Write("\nConfirm deletion? [Y/N]: ");
+    string confirm = Console.ReadLine().Trim().ToUpper();
+
+    if (confirm == "Y")
+    {
+        selectedOrder.OrderStatus = Order.STATUS_CANCELLED;
+        refundStack.Push(selectedOrder);
+
+        Console.WriteLine(
+            $"Order {selectedOrder.OrderId} cancelled. " +
+            $"Refund of ${selectedOrder.OrderTotal:0.00} processed.");
+    }
+    else
+    {
+        Console.WriteLine("Order deletion aborted.");
+    }
+}
 
 }
 
