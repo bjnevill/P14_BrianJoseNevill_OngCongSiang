@@ -7,6 +7,8 @@ Dictionary<string, FoodItem> foodItems = LoadFoodItems(restaurants);
 Dictionary<string, Customer> customers = LoadCustomer();
 Dictionary<int, Order> orders = LoadOrders(customers, restaurants, foodItems);
 
+Stack<Order> refundStack = new Stack<Order>();
+
 Console.WriteLine("Welcome to the Gruberoo Food Delivery System");
 Console.WriteLine($"{restaurants.Count} restaurants loaded!");
 Console.WriteLine($"{foodItems.Count} food items loaded!");
@@ -63,7 +65,68 @@ do
     }
     else if (choice == 4)
     {
+        Console.WriteLine("Process Order");
+        Console.WriteLine("=============");
+        Console.Write("Enter Restaurant ID: ");
+        string restaurantId = Console.ReadLine();
 
+        if (!restaurants.ContainsKey(restaurantId))
+        {
+            Console.WriteLine("Invalid Restaurant ID.");
+            Console.WriteLine("");
+            continue;
+        }
+
+        Queue<Order> orderQueue = restaurants[restaurantId].Orders;
+
+        int count = orderQueue.Count;
+
+        for (int i = 0; i < count; i++)
+        {
+            Order order = orderQueue.Dequeue();
+
+            order.DisplayForProcessing();
+            Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+            string option = Console.ReadLine().ToUpper();
+
+            switch (option)
+            {
+                case "C":
+                    if (order.ConfirmOrder())
+                        Console.WriteLine($"Order {order.OrderId} confirmed. Status: Preparing");
+                    else
+                        Console.WriteLine("Order cannot be confirmed.");
+                    break;
+
+                case "R":
+                    if (order.RejectOrder(refundStack))
+                        Console.WriteLine("Order rejected. Refund initiated.");
+                    else
+                        Console.WriteLine("Order cannot be rejected.");
+                    break;
+
+                case "S":
+                    if (order.SkipOrder())
+                        Console.WriteLine("Order skipped.");
+                    else
+                        Console.WriteLine("Only cancelled orders can be skipped.");
+                    break;
+
+                case "D":
+                    if (order.DeliverOrder())
+                        Console.WriteLine($"Order {order.OrderId} delivered successfully.");
+                    else
+                        Console.WriteLine("Order cannot be delivered.");
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid option.");
+                    break;
+            }
+
+            orderQueue.Enqueue(order);
+            Console.WriteLine("");
+        }
     }
     else if (choice == 5)
     {
