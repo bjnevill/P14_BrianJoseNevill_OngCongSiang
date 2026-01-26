@@ -145,6 +145,7 @@ do
     }
 
 } while (choice != 0);
+Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
 
 
 Dictionary<string, Restaurant> LoadRestaurants()
@@ -286,9 +287,6 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
 
 }
 
-DeleteOrder(orders.Values.ToList(), refundStack);
-
-// -------------------------------------------------------------
 
 static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
