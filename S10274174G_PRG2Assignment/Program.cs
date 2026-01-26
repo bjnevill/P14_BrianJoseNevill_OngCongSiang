@@ -418,15 +418,29 @@ void CreateNewOrder()
             Console.WriteLine("Invalid Restaurant ID");
         }
     }
-    Console.Write("Enter Delivery Date (dd/mm/yyyy): ");
-    string date = Console.ReadLine();
-    Console.Write("Enter Delivery Time (hh:mm): ");
-    string time = Console.ReadLine();
+
+    DateTime deliveryDateTime;
+    while (true)
+    {
+        Console.Write("Enter Delivery Date (dd/mm/yyyy): ");
+        string date = Console.ReadLine();
+        Console.Write("Enter Delivery Time (hh:mm): ");
+        string time = Console.ReadLine();
+        string sdatetime = date + " " + time;
+        try
+        {
+            deliveryDateTime = Convert.ToDateTime(sdatetime);
+            break;
+        }
+        catch
+        {
+            Console.WriteLine("Invalid delivery date/time. Use dd/MM/yyyy and HH:mm.");
+        }
+    }
+
     Console.Write("Enter Delivery Address: ");
     string address = Console.ReadLine();
     Console.WriteLine("");
-    string sdatetime = date + " " + time;
-    DateTime deliveryDateTime = Convert.ToDateTime(sdatetime);
 
 
     Console.WriteLine("Available Food Items:");
@@ -444,13 +458,31 @@ void CreateNewOrder()
     while (true)
     {
         Console.Write("Enter item number (0 to finish): ");
-        itemNu = Convert.ToInt32(Console.ReadLine());
+        try
+        {
+            itemNu = Convert.ToInt32(Console.ReadLine());
+        }
+        catch
+        {
+            Console.WriteLine("Item number must be a number.");
+            continue;
+        }
+
         if (itemNu == 0)
         {
             break;
         }
         Console.Write("Enter quantity: ");
-        quantity = Convert.ToInt32(Console.ReadLine());
+        try
+        {
+            quantity = Convert.ToInt32(Console.ReadLine());
+        }
+        catch
+        {
+            Console.WriteLine("Quantity must be a number.");
+            continue;
+        }
+
         while (true)
         {
             if (quantity > 0)
@@ -616,7 +648,15 @@ void ModifyOrder()
     while (true)
     {
         Console.Write("Enter OrderID: ");
-        orderid = Convert.ToInt32(Console.ReadLine());
+        try
+        {
+            orderid = Convert.ToInt32(Console.ReadLine());
+        }
+        catch
+        {
+            Console.WriteLine("OrderID must be a number. Try Again!");
+            continue;
+        }
 
         foreach (Order order in pendingOrders)
         {
@@ -690,7 +730,18 @@ void ModifyOrder()
             while (true)
             {
                 Console.Write("Enter item number to modify: ");
-                int itemnum = Convert.ToInt32(Console.ReadLine());
+
+                int itemnum;
+                try
+                {
+                    itemnum = Convert.ToInt32(Console.ReadLine());
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid item number. Enter a number.");
+                    continue;
+                }
+
 
                 if (itemnum < 1 || itemnum > selectedOrder.OrderedFoodItems.Count)
                 {
@@ -703,7 +754,16 @@ void ModifyOrder()
                     while (true)
                     {
                         Console.Write("Enter quantity: ");
-                        newqty = Convert.ToInt32(Console.ReadLine());
+                        try
+                        {
+                            newqty = Convert.ToInt32(Console.ReadLine());
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Quantity must be a number.");
+                            continue;
+                        }
+
                         if (newqty > 0) break;
 
                         Console.WriteLine("Quantity must be more than 0. Try again!");
@@ -751,7 +811,17 @@ void ModifyOrder()
             while (true)
             {
                 Console.Write("Enter item number to remove: ");
-                int itemnum = Convert.ToInt32(Console.ReadLine());
+                int itemnum;
+                try
+                {
+                    itemnum = Convert.ToInt32(Console.ReadLine());
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid item number.");
+                    continue;
+                }
+
 
                 if (itemnum < 1 || itemnum > selectedOrder.OrderedFoodItems.Count)
                 {
@@ -784,7 +854,16 @@ void ModifyOrder()
             while (true)
             {
                 Console.Write("Enter item number to add: ");
-                itemnum = Convert.ToInt32(Console.ReadLine());
+                try
+                {
+                    itemnum = Convert.ToInt32(Console.ReadLine());
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid item number.");
+                    continue;
+                }
+
 
                 if (itemnum >= 1 && itemnum <= itemCount)
                 {
@@ -800,7 +879,16 @@ void ModifyOrder()
             while (true)
             {
                 Console.Write("Enter quantity: ");
-                qty = Convert.ToInt32(Console.ReadLine());
+                try
+                {
+                    qty = Convert.ToInt32(Console.ReadLine());
+                }
+                catch
+                {
+                    Console.WriteLine("Quantity must be a number.");
+                    continue;
+                }
+
 
                 if (qty > 0)
                 {
@@ -867,10 +955,21 @@ void ModifyOrder()
     }
     else
     {
-        Console.Write("Enter new Delivery Time (hh:mm): ");
-        string time = Console.ReadLine();
-        string date = selectedOrder.DeliveryDateTime.ToString("dd/MM/yyyy");
-        selectedOrder.DeliveryDateTime = Convert.ToDateTime(date + " " + time);
+        while (true)
+        {
+            Console.Write("Enter new Delivery Time (hh:mm): ");
+            string time = Console.ReadLine();
+            string date = selectedOrder.DeliveryDateTime.ToString("dd/MM/yyyy");
+            try
+            {
+                selectedOrder.DeliveryDateTime = Convert.ToDateTime(date + " " + time);
+            }
+            catch
+            {
+                Console.WriteLine("Invalid time format. Use HH:mm (e.g. 14:30).");
+                break;
+            }
+        }
 
         Console.WriteLine($"Order {orderid} updated. New Delivery Time: {orders[orderid].DeliveryDateTime.ToString("HH:mm")}");
     }
