@@ -258,7 +258,7 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
             paid = true;
         }
         string[] items = split[1].Split('|');
-        Order order1 = new Order(orderID, createdDateTime, totalAmount, status, deliveryDateTime, address, "unkown", paid, customers[email], restaurants[restaurantId],"-");
+        Order order1 = new Order(orderID, createdDateTime, totalAmount, status, deliveryDateTime, address, "unkown", paid, customers[email], restaurants[restaurantId], "-");
         for (int j = 0; j < items.Length; j++)
         {
             string[] item = items[j].Split(',');
@@ -282,19 +282,34 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
     }
 
     return orders;
+}
+DeleteOrder(orders.Values.ToList(), refundStack);
 
-    static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
+// -------------------------------------------------------------
+
+static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
     Console.WriteLine("Delete Order");
     Console.WriteLine("============");
 
+    // Email input validation
     Console.Write("Enter Customer Email: ");
-    string email = Console.ReadLine().Trim();
+    string email = (Console.ReadLine() ?? "").Trim();
 
-    // Find pending orders for customer
+    if (string.IsNullOrWhiteSpace(email))
+    {
+        Console.WriteLine("Email cannot be empty.");
+        return;
+    }
+
+    // Find pending orders for customer (NO constants needed, safe for spacing/case)
     List<Order> pendingOrders = orderList
-        .Where(o => o.Customer.CustomerEmail.Equals(email, StringComparison.OrdinalIgnoreCase)
-                 && o.OrderStatus == Order.STATUS_PENDING)
+        .Where(o => o != null
+                 && o.Customer != null
+                 && !string.IsNullOrWhiteSpace(o.Customer.EmailAdress) // <-- adjust if your property name differs
+                 && o.Customer.EmailAdress.Trim().Equals(email, StringComparison.OrdinalIgnoreCase)
+                 && !string.IsNullOrWhiteSpace(o.OrderStatus)
+                 && o.OrderStatus.Trim().Equals("Pending", StringComparison.OrdinalIgnoreCase))
         .ToList();
 
     if (pendingOrders.Count == 0)
@@ -309,15 +324,17 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
         Console.WriteLine(o.OrderId);
     }
 
+    // Order ID validation
     Console.Write("\nEnter Order ID: ");
-    if (!int.TryParse(Console.ReadLine(), out int orderId))
+    string orderIdInput = (Console.ReadLine() ?? "").Trim();
+
+    if (!int.TryParse(orderIdInput, out int orderId))
     {
-        Console.WriteLine("Invalid Order ID.");
+        Console.WriteLine("Invalid Order ID. Must be a number.");
         return;
     }
 
-    Order selectedOrder = pendingOrders
-        .FirstOrDefault(o => o.OrderId == orderId);
+    Order selectedOrder = pendingOrders.FirstOrDefault(o => o.OrderId == orderId);
 
     if (selectedOrder == null)
     {
@@ -340,12 +357,20 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
     Console.WriteLine($"Total Amount: ${selectedOrder.OrderTotal:0.00}");
     Console.WriteLine($"Order Status: {selectedOrder.OrderStatus}");
 
+    // Confirm deletion validation
     Console.Write("\nConfirm deletion? [Y/N]: ");
-    string confirm = Console.ReadLine().Trim().ToUpper();
+    string confirm = (Console.ReadLine() ?? "").Trim().ToUpper();
+
+    while (confirm != "Y" && confirm != "N")
+    {
+        Console.Write("Invalid option. Confirm deletion? [Y/N]: ");
+        confirm = (Console.ReadLine() ?? "").Trim().ToUpper();
+    }
 
     if (confirm == "Y")
     {
-        selectedOrder.OrderStatus = Order.STATUS_CANCELLED;
+        // Cancel order + push to refund stack
+        selectedOrder.OrderStatus = "Cancelled";
         refundStack.Push(selectedOrder);
 
         Console.WriteLine(
@@ -356,8 +381,6 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
     {
         Console.WriteLine("Order deletion aborted.");
     }
-}
-
 }
 
 void CreateNewOrder()
