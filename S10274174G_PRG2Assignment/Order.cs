@@ -20,6 +20,8 @@ namespace S10274174G_PRG2Assignment
         private SpecialOffer? specialOffer;
         private Customer customer;
         private Restaurant restaurant;
+        private string specialRequest;
+
 
         public int OrderId
         {
@@ -81,7 +83,13 @@ namespace S10274174G_PRG2Assignment
             get { return restaurant; }
             set { restaurant = value; }
         }
-        public Order(int id, DateTime orderDateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant)
+
+        public string SpecialRequest
+        {
+            get { return specialRequest; }
+            set { specialRequest = value; }
+        }
+        public Order(int id, DateTime orderDateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant, string specialRequest)
         {
             OrderId = id;
             OrderDateTime = orderDateTime;
@@ -94,8 +102,9 @@ namespace S10274174G_PRG2Assignment
             OrderedFoodItems = new List<OrderedFoodItem>();
             Customer = customer;
             Restaurant = restaurant;
+            SpecialRequest = specialRequest;
         }
-        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant)
+        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant, string specialRequest)
         {
             OrderId = id;
             OrderDateTime = dateTime;
@@ -109,17 +118,18 @@ namespace S10274174G_PRG2Assignment
             SpecialOffer = specialOffer;
             Customer = customer;
             Restaurant = restaurant;
+            SpecialRequest = specialRequest;
         }
         public double CalculateOrderTotal()
         {
-            const double DeliveryFee = 5.00;
+
             double total = 0;
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
                 total += item.CalculateSubTotal();
             }
-            
-            return OrderTotal = total + DeliveryFee;
+            OrderTotal = total;
+            return OrderTotal = total;
         }
 
         public void AddOrderedFoodItem(OrderedFoodItem item)
@@ -134,18 +144,77 @@ namespace S10274174G_PRG2Assignment
 
         public void DisplayOrderedFoodItems()
         {
-            Console.WriteLine($"Order ID: {OrderId}, DateTime: {OrderDateTime}, Total: ${OrderTotal}, Status: {OrderStatus}");
-            Console.WriteLine($"Delivery DateTime: {DeliveryDateTime}, Address: {DeliveryAddress}, Payment Method: {OrderPaymentMethod}, Paid: {OrderPaid}");
-            Console.WriteLine("Ordered Food Items:");
+            Console.WriteLine($"Order ID: {OrderId} - Ordered Food Items:");
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
-                Console.WriteLine($"{item.ItemName} - Qty: {item.QtyOrdered} - SubTotal: ${item.CalculateSubTotal()}");
+                Console.WriteLine(item.ToString());
             }
         }
 
         public override string ToString()
         {
-            return $"Order ID: {OrderId}, DateTime: {OrderDateTime}, Total: ${OrderTotal}, Status: {OrderStatus}, Delivery Address: {DeliveryAddress}";
+            return $"{OrderId,-12}{Customer.CustomerName,-14}{Restaurant.RestaurantName,-17}{DeliveryDateTime.ToString("dd/MM/yyyy HH:mm"),-22}${OrderTotal.ToString("0.00"),-9}{OrderStatus,-10}";
         }
+
+        public void DisplayForProcessing()
+        {
+            Console.WriteLine($"\nOrder {OrderId}:");
+            Console.WriteLine($"Customer: {Customer.CustomerName}");
+            Console.WriteLine("Ordered Items:");
+
+            int count = 1;
+            foreach (OrderedFoodItem item in OrderedFoodItems)
+            {
+                Console.WriteLine($"{count}. {item.ItemName} - {item.QtyOrdered}");
+                count++;
+            }
+
+            Console.WriteLine($"Delivery date/time: {DeliveryDateTime:dd/MM/yyyy HH:mm}");
+            Console.WriteLine($"Total Amount: ${OrderTotal:F2}");
+            Console.WriteLine($"Order Status: {OrderStatus}");
+        }
+
+        public bool ConfirmOrder()
+        {
+            if (OrderStatus == STATUS_PENDING)
+            {
+                OrderStatus = STATUS_PREPARING;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RejectOrder(Stack<Order> refundStack)
+        {
+            if (OrderStatus == STATUS_PENDING)
+            {
+                OrderStatus = STATUS_REJECTED;
+                refundStack.Push(this);
+                return true;
+            }
+            return false;
+        }
+
+        public bool SkipOrder()
+        {
+            return OrderStatus == STATUS_CANCELLED;
+        }
+
+        public bool DeliverOrder()
+        {
+            if (OrderStatus == STATUS_PREPARING)
+            {
+                OrderStatus = STATUS_DELIVERED;
+                return true;
+            }
+            return false;
+        }
+
+        public const string STATUS_PENDING = "Pending";
+        public const string STATUS_PREPARING = "Preparing";
+        public const string STATUS_CANCELLED = "Cancelled";
+        public const string STATUS_REJECTED = "Rejected";
+        public const string STATUS_DELIVERED = "Delivered";
     }   
 }
+
