@@ -20,6 +20,8 @@ namespace S10274174G_PRG2Assignment
         private SpecialOffer? specialOffer;
         private Customer customer;
         private Restaurant restaurant;
+        private string specialRequest;
+
 
         public int OrderId
         {
@@ -81,7 +83,13 @@ namespace S10274174G_PRG2Assignment
             get { return restaurant; }
             set { restaurant = value; }
         }
-        public Order(int id, DateTime orderDateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant)
+
+        public string SpecialRequest
+        {
+            get { return specialRequest; }
+            set { specialRequest = value; }
+        }
+        public Order(int id, DateTime orderDateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, Customer customer, Restaurant restaurant, string specialRequest)
         {
             OrderId = id;
             OrderDateTime = orderDateTime;
@@ -94,8 +102,9 @@ namespace S10274174G_PRG2Assignment
             OrderedFoodItems = new List<OrderedFoodItem>();
             Customer = customer;
             Restaurant = restaurant;
+            SpecialRequest = specialRequest;
         }
-        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant)
+        public Order(int id, DateTime dateTime, double total, string status, DateTime deliveryDateTime, string deliveryAddress, string paymentMethod, bool paid, SpecialOffer specialOffer, Customer customer, Restaurant restaurant, string specialRequest)
         {
             OrderId = id;
             OrderDateTime = dateTime;
@@ -109,17 +118,18 @@ namespace S10274174G_PRG2Assignment
             SpecialOffer = specialOffer;
             Customer = customer;
             Restaurant = restaurant;
+            SpecialRequest = specialRequest;
         }
         public double CalculateOrderTotal()
         {
-            const double DeliveryFee = 5.00;
+
             double total = 0;
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
                 total += item.CalculateSubTotal();
             }
-            
-            return OrderTotal = total + DeliveryFee;
+            OrderTotal = total;
+            return OrderTotal = total;
         }
 
         public void AddOrderedFoodItem(OrderedFoodItem item)
@@ -134,14 +144,10 @@ namespace S10274174G_PRG2Assignment
 
         public void DisplayOrderedFoodItems()
         {
-            Console.WriteLine("All Orders");
-            Console.WriteLine("==========");
-            Console.WriteLine($"{"Order ID",-10}{"Customer",-16}{"Restaurant",-21}{"Delivery Date/Time",-22}{"Amount",-10}{"Status",-10}");
-            Console.WriteLine($"{"--------",-10}{"--------------",-16}{"-------------------",-21}{"---------------------",-22}{"--------",-10}{"----------",-10}");
-
+            Console.WriteLine($"Order ID: {OrderId} - Ordered Food Items:");
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
-                Console.WriteLine($"{item.ItemName} - Qty: {item.QtyOrdered} - SubTotal: ${item.CalculateSubTotal()}");
+                Console.WriteLine(item.ToString());
             }
         }
 
