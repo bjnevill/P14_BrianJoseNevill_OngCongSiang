@@ -155,5 +155,66 @@ namespace S10274174G_PRG2Assignment
         {
             return $"{OrderId,-12}{Customer.CustomerName,-14}{Restaurant.RestaurantName,-17}{DeliveryDateTime.ToString("dd/MM/yyyy HH:mm"),-22}${OrderTotal.ToString("0.00"),-9}{OrderStatus,-10}";
         }
+
+        public void DisplayForProcessing()
+        {
+            Console.WriteLine($"\nOrder {OrderId}:");
+            Console.WriteLine($"Customer: {Customer.CustomerName}");
+            Console.WriteLine("Ordered Items:");
+
+            int count = 1;
+            foreach (OrderedFoodItem item in OrderedFoodItems)
+            {
+                Console.WriteLine($"{count}. {item.ItemName} - {item.QtyOrdered}");
+                count++;
+            }
+
+            Console.WriteLine($"Delivery date/time: {DeliveryDateTime:dd/MM/yyyy HH:mm}");
+            Console.WriteLine($"Total Amount: ${OrderTotal:F2}");
+            Console.WriteLine($"Order Status: {OrderStatus}");
+        }
+
+        public bool ConfirmOrder()
+        {
+            if (OrderStatus == STATUS_PENDING)
+            {
+                OrderStatus = STATUS_PREPARING;
+                return true;
+            }
+            return false;
+        }
+
+        public bool RejectOrder(Stack<Order> refundStack)
+        {
+            if (OrderStatus == STATUS_PENDING)
+            {
+                OrderStatus = STATUS_REJECTED;
+                refundStack.Push(this);
+                return true;
+            }
+            return false;
+        }
+
+        public bool SkipOrder()
+        {
+            return OrderStatus == STATUS_CANCELLED;
+        }
+
+        public bool DeliverOrder()
+        {
+            if (OrderStatus == STATUS_PREPARING)
+            {
+                OrderStatus = STATUS_DELIVERED;
+                return true;
+            }
+            return false;
+        }
+
+        public const string STATUS_PENDING = "Pending";
+        public const string STATUS_PREPARING = "Preparing";
+        public const string STATUS_CANCELLED = "Cancelled";
+        public const string STATUS_REJECTED = "Rejected";
+        public const string STATUS_DELIVERED = "Delivered";
     }   
 }
+

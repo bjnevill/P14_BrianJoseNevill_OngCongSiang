@@ -38,5 +38,10 @@ namespace S10274174G_PRG2Assignment
         {
             return SubTotal = base.ItemPrice * QtyOrdered;
         }
+
+        public override string ToString()
+        {
+            return $"{ItemName} - {QtyOrdered} x ${ItemPrice:F2} = ${SubTotal:F2}";
+        }
     }
 }
