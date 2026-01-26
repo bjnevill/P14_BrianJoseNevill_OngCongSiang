@@ -128,7 +128,7 @@ namespace S10274174G_PRG2Assignment
             {
                 total += item.CalculateSubTotal();
             }
-
+            OrderTotal = total;
             return OrderTotal = total;
         }
 
