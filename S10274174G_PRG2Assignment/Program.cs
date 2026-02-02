@@ -306,14 +306,27 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
     }
 
     // Find pending orders for customer (NO constants needed, safe for spacing/case)
-    List<Order> pendingOrders = orderList
-        .Where(o => o != null
-                 && o.Customer != null
-                 && !string.IsNullOrWhiteSpace(o.Customer.EmailAdress) // <-- adjust if your property name differs
-                 && o.Customer.EmailAdress.Trim().Equals(email, StringComparison.OrdinalIgnoreCase)
-                 && !string.IsNullOrWhiteSpace(o.OrderStatus)
-                 && o.OrderStatus.Trim().Equals("Pending", StringComparison.OrdinalIgnoreCase))
-        .ToList();
+    List<Order> pendingOrders = new List<Order>();
+
+    foreach (Order o in orderList)
+    {
+        if (o == null)
+            continue;
+
+        if (o.Customer == null)
+            continue;
+
+        if (o.Customer.CustomerEmail == null)
+            continue;
+
+        if (o.Customer.CustomerEmail.Trim().ToLower() != email.Trim().ToLower())
+            continue;
+
+        if (o.OrderStatus != Order.STATUS_PENDING)
+            continue;
+
+        pendingOrders.Add(o);
+    }
 
     if (pendingOrders.Count == 0)
     {
@@ -337,7 +350,16 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         return;
     }
 
-    Order selectedOrder = pendingOrders.FirstOrDefault(o => o.OrderId == orderId);
+    Order selectedOrder = null;
+
+    foreach (Order o in pendingOrders)
+    {
+        if (o.OrderId == orderId)
+        {
+            selectedOrder = o;
+            break;
+        }
+    }
 
     if (selectedOrder == null)
     {
