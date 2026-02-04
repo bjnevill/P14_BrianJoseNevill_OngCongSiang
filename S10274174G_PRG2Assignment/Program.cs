@@ -30,6 +30,7 @@ do
     Console.WriteLine("4. Process an order");
     Console.WriteLine("5. Modify an existing order");
     Console.WriteLine("6. Delete an existing order");
+    Console.WriteLine("7. Display total order amount");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Convert.ToInt32(Console.ReadLine());
@@ -138,6 +139,10 @@ do
     {
         DeleteOrder(orders.Values.ToList(), refundStack);
     }
+    else if (choice == 7)
+    {
+        DisplayTotals(restaurants);
+    }
     else
     {
         Console.WriteLine("Inavlid Option");
@@ -147,7 +152,51 @@ do
 } while (choice != 0);
 Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
 
+void DisplayTotals(Dictionary<string, Restaurant> restaurants)
+{
+    const double DELIVERY_FEE = 5.00;
 
+    double grandTotalOrders = 0;
+    double grandTotalRefunds = 0;
+
+    Console.WriteLine("Order Summary by Restaurant");
+    Console.WriteLine("===========================");
+
+    foreach (Restaurant restaurant in restaurants.Values)
+    {
+        double restaurantOrderTotal = 0;
+        double restaurantRefundTotal = 0;
+
+        foreach (Order order in restaurant.Orders)
+        {
+            // Successful orders
+            if (order.OrderStatus == Order.STATUS_DELIVERED)
+            {
+                // Remove delivery fee
+                restaurantOrderTotal += (order.OrderTotal - DELIVERY_FEE);
+            }
+            // Refunded orders
+            else if (order.OrderStatus == Order.STATUS_CANCELLED
+                  || order.OrderStatus == Order.STATUS_REJECTED)
+            {
+                restaurantRefundTotal += order.OrderTotal;
+            }
+        }
+
+        Console.WriteLine($"\nRestaurant: {restaurant.RestaurantName}");
+        Console.WriteLine($"Total Successful Orders: ${restaurantOrderTotal:0.00}");
+        Console.WriteLine($"Total Refunds: ${restaurantRefundTotal:0.00}");
+
+        grandTotalOrders += restaurantOrderTotal;
+        grandTotalRefunds += restaurantRefundTotal;
+    }
+
+    Console.WriteLine("\nOverall Summary");
+    Console.WriteLine("===============");
+    Console.WriteLine($"Total Order Amount: ${grandTotalOrders:0.00}");
+    Console.WriteLine($"Total Refunds: ${grandTotalRefunds:0.00}");
+    Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
+}
 Dictionary<string, Restaurant> LoadRestaurants()
 {
     Dictionary<string, Restaurant> restaurants = new Dictionary<string, Restaurant>();
@@ -314,10 +363,10 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         if (o.Customer == null)
             continue;
 
-        if (o.Customer.CustomerEmail == null)
+        if (o.Customer.EmailAdress == null)
             continue;
 
-        if (o.Customer.CustomerEmail.Trim().ToLower() != email.Trim().ToLower())
+        if (o.Customer.EmailAdress.Trim().ToLower() != email.Trim().ToLower())
             continue;
 
         if (o.OrderStatus != Order.STATUS_PENDING)
