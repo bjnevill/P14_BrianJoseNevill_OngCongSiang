@@ -41,11 +41,42 @@ do
     }
     else if (choice == 1)
     {
-        Console.WriteLine("All Restaurants and Menu Items");
-        Console.WriteLine("==============================");
-        foreach (Restaurant restaurant in restaurants.Values)
+        while (true)
         {
-            restaurant.DisplayMenus();
+            Console.WriteLine("\nRestaurants");
+            Console.WriteLine("===========");
+            foreach (var r in restaurants.Values)
+            {
+                Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+            }
+
+            Console.Write("Select Restaurant ID (0 to go back): ");
+            string input = Console.ReadLine().Trim();
+
+            if (input == "0")
+                break;
+
+            if (!restaurants.ContainsKey(input))
+            {
+                Console.WriteLine("Invalid Restaurant ID.");
+                continue;
+            }
+
+            Restaurant selected = restaurants[input];
+
+            Console.WriteLine($"\n{selected.RestaurantName} Menu:");
+            foreach (Menu menu in selected.Menus)
+            {
+                Console.WriteLine($"Menu: {menu.MenuName}");
+                foreach (FoodItem item in menu.FoodItems)
+                {
+                    Console.WriteLine(item.ToString());
+                }
+            }
+
+            Console.WriteLine("\nPress any key to return to the restaurant list...");
+            Console.ReadKey();
+            Console.Clear();
         }
     }
     else if (choice == 2)
@@ -197,6 +228,49 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
     Console.WriteLine($"Total Refunds: ${grandTotalRefunds:0.00}");
     Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
 }
+
+void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
+{
+    while (true)
+    {
+        Console.WriteLine("\nRestaurants");
+        Console.WriteLine("===========");
+        foreach (var r in restaurants.Values)
+        {
+            Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+        }
+
+        Console.Write("Select Restaurant ID (0 to go back): ");
+        string input = Console.ReadLine().Trim();
+
+        if (input == "0")
+            break; 
+
+        if (!restaurants.ContainsKey(input))
+        {
+            Console.WriteLine("Invalid Restaurant ID.");
+            continue;
+        }
+
+        Restaurant selected = restaurants[input];
+
+        Console.WriteLine($"\n{selected.RestaurantName} Menu:");
+        foreach (Menu menu in selected.Menus)
+        {
+            Console.WriteLine($"Menu: {menu.MenuName}");
+            foreach (FoodItem item in menu.FoodItems)
+            {
+                Console.WriteLine(item.ToString());
+            }
+        }
+
+        Console.WriteLine("\nPress any key to return to the restaurant list...");
+        Console.ReadKey();
+        Console.Clear();
+    }
+}
+
+
 Dictionary<string, Restaurant> LoadRestaurants()
 {
     Dictionary<string, Restaurant> restaurants = new Dictionary<string, Restaurant>();
