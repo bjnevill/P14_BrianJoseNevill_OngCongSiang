@@ -1,4 +1,11 @@
-﻿using System;
+﻿//==========================================================
+// Student Number : S10274174G
+// Student Name : Brian Jose Nevill
+// Partner Name : Ong Cong Siang
+//==========================================================
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -124,12 +131,13 @@ namespace S10274174G_PRG2Assignment
         {
 
             double total = 0;
+            double fee = 5.00;
             foreach (OrderedFoodItem item in OrderedFoodItems)
             {
                 total += item.CalculateSubTotal();
             }
-            OrderTotal = total;
-            return OrderTotal = total;
+            OrderTotal = total + fee;
+            return OrderTotal;
         }
 
         public void AddOrderedFoodItem(OrderedFoodItem item)
