@@ -409,9 +409,6 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
 
 }
 
-DeleteOrder(orders.Values.ToList(), refundStack);
-
-// -------------------------------------------------------------
 
 static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
