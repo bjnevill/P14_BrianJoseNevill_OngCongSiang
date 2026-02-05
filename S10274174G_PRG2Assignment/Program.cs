@@ -1,4 +1,9 @@
-﻿
+﻿//==========================================================
+// Student Number : S10274174G
+// Student Name : Brian Jose Nevill - Questions:2,3,5,7
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8
+//==========================================================
+
 using S10274174G_PRG2Assignment;
 using System.Runtime.CompilerServices;
 using System.Security.Principal;
@@ -265,14 +270,7 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
         {
             string[] item = items[j].Split(',');
             int quantity;
-            if (item.Length < 2)
-            {
-                quantity = 1;
-            }
-            else
-            {
-                quantity = Convert.ToInt32(item[1]);
-            }
+            quantity = Convert.ToInt32(item[1]);
             string itemName = item[0];
             string desc = foodItems[itemName].ItemDesc;
             double price = foodItems[itemName].ItemPrice;
@@ -972,3 +970,6 @@ void ModifyOrder()
         Console.WriteLine($"Order {orderid} updated. New Delivery Time: {orders[orderid].DeliveryDateTime.ToString("HH:mm")}");
     }
 }
+
+
+
