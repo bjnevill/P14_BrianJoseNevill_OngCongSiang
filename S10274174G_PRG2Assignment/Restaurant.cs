@@ -84,6 +84,11 @@ namespace S10274174G_PRG2Assignment
             }
         }
 
+        public void DisplayMenu()
+        {
+            // show menus / food items
+        }
+
         public void AddMenu(Menu menu)
         {
             Menus.Add(menu);
