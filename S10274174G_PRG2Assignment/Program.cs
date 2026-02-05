@@ -35,6 +35,7 @@ do
     Console.WriteLine("4. Process an order");
     Console.WriteLine("5. Modify an existing order");
     Console.WriteLine("6. Delete an existing order");
+    Console.WriteLine("7. Display total order amount");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Convert.ToInt32(Console.ReadLine());
@@ -45,11 +46,42 @@ do
     }
     else if (choice == 1)
     {
-        Console.WriteLine("All Restaurants and Menu Items");
-        Console.WriteLine("==============================");
-        foreach (Restaurant restaurant in restaurants.Values)
+        while (true)
         {
-            restaurant.DisplayMenus();
+            Console.WriteLine("\nRestaurants");
+            Console.WriteLine("===========");
+            foreach (var r in restaurants.Values)
+            {
+                Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+            }
+
+            Console.Write("Select Restaurant ID (0 to go back): ");
+            string input = Console.ReadLine().Trim();
+
+            if (input == "0")
+                break;
+
+            if (!restaurants.ContainsKey(input))
+            {
+                Console.WriteLine("Invalid Restaurant ID.");
+                continue;
+            }
+
+            Restaurant selected = restaurants[input];
+
+            Console.WriteLine($"\n{selected.RestaurantName} Menu:");
+            foreach (Menu menu in selected.Menus)
+            {
+                Console.WriteLine($"Menu: {menu.MenuName}");
+                foreach (FoodItem item in menu.FoodItems)
+                {
+                    Console.WriteLine(item.ToString());
+                }
+            }
+
+            Console.WriteLine("\nPress any key to return to the restaurant list...");
+            Console.ReadKey();
+            Console.Clear();
         }
     }
     else if (choice == 2)
@@ -143,6 +175,10 @@ do
     {
         DeleteOrder(orders.Values.ToList(), refundStack);
     }
+    else if (choice == 7)
+    {
+        DisplayTotals(restaurants);
+    }
     else
     {
         Console.WriteLine("Inavlid Option");
@@ -151,6 +187,93 @@ do
 
 } while (choice != 0);
 Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
+
+void DisplayTotals(Dictionary<string, Restaurant> restaurants)
+{
+    const double DELIVERY_FEE = 5.00;
+
+    double grandTotalOrders = 0;
+    double grandTotalRefunds = 0;
+
+    Console.WriteLine("Order Summary by Restaurant");
+    Console.WriteLine("===========================");
+
+    foreach (Restaurant restaurant in restaurants.Values)
+    {
+        double restaurantOrderTotal = 0;
+        double restaurantRefundTotal = 0;
+
+        foreach (Order order in restaurant.Orders)
+        {
+            // Successful orders
+            if (order.OrderStatus == Order.STATUS_DELIVERED)
+            {
+                // Remove delivery fee
+                restaurantOrderTotal += (order.OrderTotal - DELIVERY_FEE);
+            }
+            // Refunded orders
+            else if (order.OrderStatus == Order.STATUS_CANCELLED
+                  || order.OrderStatus == Order.STATUS_REJECTED)
+            {
+                restaurantRefundTotal += order.OrderTotal;
+            }
+        }
+
+        Console.WriteLine($"\nRestaurant: {restaurant.RestaurantName}");
+        Console.WriteLine($"Total Successful Orders: ${restaurantOrderTotal:0.00}");
+        Console.WriteLine($"Total Refunds: ${restaurantRefundTotal:0.00}");
+
+        grandTotalOrders += restaurantOrderTotal;
+        grandTotalRefunds += restaurantRefundTotal;
+    }
+
+    Console.WriteLine("\nOverall Summary");
+    Console.WriteLine("===============");
+    Console.WriteLine($"Total Order Amount: ${grandTotalOrders:0.00}");
+    Console.WriteLine($"Total Refunds: ${grandTotalRefunds:0.00}");
+    Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
+}
+
+void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
+{
+    while (true)
+    {
+        Console.WriteLine("\nRestaurants");
+        Console.WriteLine("===========");
+        foreach (var r in restaurants.Values)
+        {
+            Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+        }
+
+        Console.Write("Select Restaurant ID (0 to go back): ");
+        string input = Console.ReadLine().Trim();
+
+        if (input == "0")
+            break; 
+
+        if (!restaurants.ContainsKey(input))
+        {
+            Console.WriteLine("Invalid Restaurant ID.");
+            continue;
+        }
+
+        Restaurant selected = restaurants[input];
+
+        Console.WriteLine($"\n{selected.RestaurantName} Menu:");
+        foreach (Menu menu in selected.Menus)
+        {
+            Console.WriteLine($"Menu: {menu.MenuName}");
+            foreach (FoodItem item in menu.FoodItems)
+            {
+                Console.WriteLine(item.ToString());
+            }
+        }
+
+        Console.WriteLine("\nPress any key to return to the restaurant list...");
+        Console.ReadKey();
+        Console.Clear();
+    }
+}
 
 
 Dictionary<string, Restaurant> LoadRestaurants()
@@ -302,14 +425,27 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
     }
 
     // Find pending orders for customer (NO constants needed, safe for spacing/case)
-    List<Order> pendingOrders = orderList
-        .Where(o => o != null
-                 && o.Customer != null
-                 && !string.IsNullOrWhiteSpace(o.Customer.EmailAdress) // <-- adjust if your property name differs
-                 && o.Customer.EmailAdress.Trim().Equals(email, StringComparison.OrdinalIgnoreCase)
-                 && !string.IsNullOrWhiteSpace(o.OrderStatus)
-                 && o.OrderStatus.Trim().Equals("Pending", StringComparison.OrdinalIgnoreCase))
-        .ToList();
+    List<Order> pendingOrders = new List<Order>();
+
+    foreach (Order o in orderList)
+    {
+        if (o == null)
+            continue;
+
+        if (o.Customer == null)
+            continue;
+
+        if (o.Customer.EmailAdress == null)
+            continue;
+
+        if (o.Customer.EmailAdress.Trim().ToLower() != email.Trim().ToLower())
+            continue;
+
+        if (o.OrderStatus != Order.STATUS_PENDING)
+            continue;
+
+        pendingOrders.Add(o);
+    }
 
     if (pendingOrders.Count == 0)
     {
@@ -333,7 +469,16 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         return;
     }
 
-    Order selectedOrder = pendingOrders.FirstOrDefault(o => o.OrderId == orderId);
+    Order selectedOrder = null;
+
+    foreach (Order o in pendingOrders)
+    {
+        if (o.OrderId == orderId)
+        {
+            selectedOrder = o;
+            break;
+        }
+    }
 
     if (selectedOrder == null)
     {
