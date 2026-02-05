@@ -212,6 +212,7 @@ SaveOrdersToCsv(refundList, "stack.csv");
 void SaveOrdersToCsv(List<Order> orderList, string filename)
 {
     string data = "";
+    string itemline;
     foreach (Order order in orderList)
     {
         int orderid = order.OrderId;
@@ -229,7 +230,8 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
             items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
         }
         items = items.Trim('|');
-        data += $"{orderid},{custEmail},{restaurantId},{deliveryDate},{deliveryTime},{deliveryAddress},{createdDateTime},{totalAmount},{status},{items}\n";
+        itemline = $"\"{items}\"";
+        data += $"{orderid},{custEmail},{restaurantId},{deliveryDate},{deliveryTime},{deliveryAddress},{createdDateTime},{totalAmount},{status},{itemline}\n";
     }
 
     data = data.Trim('\n');
