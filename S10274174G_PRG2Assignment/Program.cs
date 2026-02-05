@@ -1,4 +1,9 @@
-﻿
+﻿//==========================================================
+// Student Number : S10274174G
+// Student Name : Brian Jose Nevill - Questions:2,3,5,7
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8
+//==========================================================
+
 using S10274174G_PRG2Assignment;
 using System.Runtime.CompilerServices;
 using System.Security.Principal;
@@ -30,7 +35,8 @@ do
     Console.WriteLine("4. Process an order");
     Console.WriteLine("5. Modify an existing order");
     Console.WriteLine("6. Delete an existing order");
-    Console.WriteLine("7. Display total order amount");
+    Console.WriteLine("7. Bulk processing of unprocessed orders for a current day");
+    Console.WriteLine("8. Display total order amount");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Convert.ToInt32(Console.ReadLine());
@@ -172,6 +178,10 @@ do
     }
     else if (choice == 7)
     {
+        BulkOrder();
+    }
+    else if (choice == 8)
+    {
         DisplayTotals(restaurants);
     }
     else
@@ -182,6 +192,56 @@ do
 
 } while (choice != 0);
 Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
+
+List<Order> queueList = new List<Order>();
+foreach (Restaurant restaurant in restaurants.Values)
+{
+    foreach (Order order in restaurant.Orders)
+    {
+        if (order.OrderStatus == "Pending" || order.OrderStatus == "Preparing")
+        {
+            queueList.Add(order);
+        }
+    }
+}
+List<Order> refundList = refundStack.ToList();
+SaveOrdersToCsv(queueList, "queue.csv");
+SaveOrdersToCsv(refundList, "stack.csv");
+
+
+void SaveOrdersToCsv(List<Order> orderList, string filename)
+{
+    string data = "";
+    foreach (Order order in orderList)
+    {
+        int orderid = order.OrderId;
+        string custEmail = order.Customer.EmailAdress;
+        string restaurantId = order.Restaurant.RestaurantId;
+        string deliveryDate = order.DeliveryDateTime.ToString("dd/MM/yyyy");
+        string deliveryTime = order.DeliveryDateTime.ToString("HH:mm");
+        string deliveryAddress = order.DeliveryAddress;
+        string createdDateTime = order.OrderDateTime.ToString("dd/MM/yyyy HH:mm");
+        string totalAmount = order.OrderTotal.ToString("0.00");
+        string status = order.OrderStatus;
+        string items = "";
+        foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
+        {
+            items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
+        }
+        items = items.Trim('|');
+        data += $"{orderid},{custEmail},{restaurantId},{deliveryDate},{deliveryTime},{deliveryAddress},{createdDateTime},{totalAmount},{status},{items}\n";
+    }
+
+    data = data.Trim('\n');
+    using (StreamWriter sw = new StreamWriter(filename, false))
+    {
+        sw.WriteLine("OrderId,CustomerEmail,RestaurantId,DeliveryDate,DeliveryTime,DeliveryAddress,CreatedDateTime,TotalAmount,Status,Items");
+        sw.WriteLine(data);
+    }
+}
+
+
+
 
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
@@ -388,14 +448,7 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
         {
             string[] item = items[j].Split(',');
             int quantity;
-            if (item.Length < 2)
-            {
-                quantity = 1;
-            }
-            else
-            {
-                quantity = Convert.ToInt32(item[1]);
-            }
+            quantity = Convert.ToInt32(item[1]);
             string itemName = item[0];
             string desc = foodItems[itemName].ItemDesc;
             double price = foodItems[itemName].ItemPrice;
@@ -598,12 +651,18 @@ void CreateNewOrder()
     List<OrderedFoodItem> orderedFoodItems = new List<OrderedFoodItem>();
     int itemNu;
     int quantity;
+    int maxItem = restaurants[restaurantId].Menus[0].FoodItems.Count;
     while (true)
     {
         Console.Write("Enter item number (0 to finish): ");
         try
         {
             itemNu = Convert.ToInt32(Console.ReadLine());
+            if (itemNu < 0 || itemNu > maxItem)
+            {
+                Console.WriteLine($"Invalid item number. Enter 1 to {maxItem}, or 0 to finish.");
+                continue;
+            }
         }
         catch
         {
@@ -975,6 +1034,7 @@ void ModifyOrder()
                     string removedName = selectedOrder.OrderedFoodItems[itemnum - 1].ItemName;
 
                     selectedOrder.RemoveOrderedFoodItem(selectedOrder.OrderedFoodItems[itemnum - 1]);
+                    selectedOrder.CalculateOrderTotal();
 
                     Console.WriteLine("");
                     Console.WriteLine($"Item {removedName} removed.");
@@ -1106,14 +1166,61 @@ void ModifyOrder()
             try
             {
                 selectedOrder.DeliveryDateTime = Convert.ToDateTime(date + " " + time);
+                break;
             }
             catch
             {
                 Console.WriteLine("Invalid time format. Use HH:mm (e.g. 14:30).");
-                break;
             }
         }
 
         Console.WriteLine($"Order {orderid} updated. New Delivery Time: {orders[orderid].DeliveryDateTime.ToString("HH:mm")}");
     }
 }
+
+void BulkOrder()
+{
+    Queue<Order> orderqueue = new Queue<Order>();
+    foreach (Restaurant restaurant in restaurants.Values)
+    {
+        foreach (Order order in restaurant.Orders)
+        {
+            if (order.OrderStatus == "Pending" && order.DeliveryDateTime.Date ==  DateTime.Now.Date)
+            {
+                orderqueue.Enqueue(order);
+            }
+        }
+    }
+
+    Console.WriteLine($"Total Pending Order Queues for Today: {orderqueue.Count}");
+
+    int rejectedCount = 0;
+    int preparingCount = 0;
+    int processedCount;
+    foreach (Order order in orderqueue)
+    {
+        TimeSpan diff = order.DeliveryDateTime - DateTime.Now;
+        if (diff.TotalMinutes < 60)
+        {
+            order.OrderStatus = "Rejected";
+            rejectedCount += 1;
+            refundStack.Push(order);
+        }
+        else
+        {
+            order.OrderStatus = "Preparing";
+              preparingCount += 1;
+        }
+    }
+    processedCount = rejectedCount + preparingCount;
+    double doubleProcessed = Convert.ToDouble(processedCount);
+    double percent = (doubleProcessed / orders.Count) * 100;
+    Console.WriteLine("");
+    Console.WriteLine($"Total Orders Processed for Today: {processedCount}");
+    Console.WriteLine($"Preparing: {preparingCount} Rejected: {rejectedCount}");
+    Console.WriteLine($"Percentage of automatically processed orders against all orders: {percent.ToString("0.00")}%");
+    Console.WriteLine("");
+
+
+}
+
