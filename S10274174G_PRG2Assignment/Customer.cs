@@ -17,6 +17,7 @@ namespace S10274174G_PRG2Assignment
         private string emailAdress;
         private string customerName;
         private List<Order> orders;
+        private List<Favourite> favourites; 
 
         public string EmailAdress
         {
@@ -33,11 +34,17 @@ namespace S10274174G_PRG2Assignment
             get { return orders; }
             set { orders = value; }
         }
+        public List<Favourite> Favourites
+        {
+            get { return favourites; }
+            set { favourites = value; }
+        }
         public Customer(string email, string name)
         {
             EmailAdress = email;
             CustomerName = name;
             Orders = new List<Order>();
+            Favourites = new List<Favourite>();
         }
         public void AddOrder(Order order)
         {
