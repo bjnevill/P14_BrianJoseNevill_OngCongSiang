@@ -108,90 +108,55 @@ do
         Console.WriteLine("Process Order");
         Console.WriteLine("=============");
         Console.Write("Enter Restaurant ID: ");
-        string restaurantId = Console.ReadLine().Trim();
+        string restaurantId = Console.ReadLine();
 
         if (!restaurants.ContainsKey(restaurantId))
         {
-            Console.WriteLine("Invalid Restaurant ID.\n");
+            Console.WriteLine("Invalid Restaurant ID.");
+            Console.WriteLine("");
             continue;
         }
 
         Queue<Order> orderQueue = restaurants[restaurantId].Orders;
 
-        if (orderQueue.Count == 0)
+        int count = orderQueue.Count;
+
+        for (int i = 0; i < count; i++)
         {
-            Console.WriteLine("No orders for this restaurant.\n");
-            continue;
-        }
+            Order order = orderQueue.Dequeue();
 
-        foreach (Order order in orderQueue)
-        {
-            Console.WriteLine($"Order {order.OrderId}:");
-            Console.WriteLine($"Customer: {order.Customer.CustomerName}");
-            Console.WriteLine("Ordered Items:");
-
-            int itemNo = 1;
-            foreach (OrderedFoodItem item in order.OrderedFoodItems)
-            {
-                Console.WriteLine($"{itemNo}. {item.ItemName} - {item.QtyOrdered}");
-                itemNo++;
-            }
-
-            Console.WriteLine($"Delivery date/time: {order.DeliveryDateTime:dd/MM/yyyy HH:mm}");
-            Console.WriteLine($"Total Amount: ${order.OrderTotal:0.00}");
-            Console.WriteLine($"Order Status: {order.OrderStatus}");
-
+            order.DisplayForProcessing();
             Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
-            string option = Console.ReadLine().Trim().ToUpper();
+            string option = Console.ReadLine().ToUpper();
 
             switch (option)
             {
                 case "C":
-                    if (order.OrderStatus == Order.STATUS_PENDING)
-                    {
-                        order.OrderStatus = Order.STATUS_PREPARING;
+                    if (order.ConfirmOrder())
                         Console.WriteLine($"Order {order.OrderId} confirmed. Status: Preparing");
-                    }
                     else
-                    {
                         Console.WriteLine("Order cannot be confirmed.");
-                    }
                     break;
 
                 case "R":
-                    if (order.OrderStatus == Order.STATUS_PENDING)
-                    {
-                        order.OrderStatus = Order.STATUS_REJECTED;
-                        refundStack.Push(order);
+                    if (order.RejectOrder(refundStack))
                         Console.WriteLine("Order rejected. Refund initiated.");
-                    }
                     else
-                    {
                         Console.WriteLine("Order cannot be rejected.");
-                    }
                     break;
 
                 case "S":
-                    if (order.OrderStatus == Order.STATUS_CANCELLED)
-                    {
+                    if (order.SkipOrder())
                         Console.WriteLine("Order skipped.");
-                    }
                     else
-                    {
                         Console.WriteLine("Only cancelled orders can be skipped.");
-                    }
                     break;
 
                 case "D":
-                    if (order.OrderStatus == Order.STATUS_PREPARING)
-                    {
-                        order.OrderStatus = Order.STATUS_DELIVERED;
+                    if (order.DeliverOrder())
                         Console.WriteLine($"Order {order.OrderId} delivered successfully.");
-                    }
                     else
-                    {
                         Console.WriteLine("Order cannot be delivered.");
-                    }
                     break;
 
                 default:
@@ -199,11 +164,36 @@ do
                     break;
             }
 
-            Console.WriteLine();
+            orderQueue.Enqueue(order);
+            Console.WriteLine("");
         }
     }
+    else if (choice == 5)
+    {
+        ModifyOrder();
+    }
+    else if (choice == 6)
+    {
+        DeleteOrder(orders.Values.ToList(), refundStack);
+    }
+    else if (choice == 7)
+    {
+        BulkOrder();
+    }
+    else if (choice == 8)
+    {
+        DisplayTotals(restaurants);
+    }
+    else
+    {
+        Console.WriteLine("Inavlid Option");
 
-    List<Order> queueList = new List<Order>();
+    }
+
+} while (choice != 0);
+Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
+
+List<Order> queueList = new List<Order>();
 foreach (Restaurant restaurant in restaurants.Values)
 {
     foreach (Order order in restaurant.Orders)
@@ -1189,49 +1179,48 @@ void ModifyOrder()
 }
 
 void BulkOrder()
+{
+    Queue<Order> orderqueue = new Queue<Order>();
+    foreach (Restaurant restaurant in restaurants.Values)
     {
-        Queue<Order> orderqueue = new Queue<Order>();
-        foreach (Restaurant restaurant in restaurants.Values)
+        foreach (Order order in restaurant.Orders)
         {
-            foreach (Order order in restaurant.Orders)
+            if (order.OrderStatus == "Pending" && order.DeliveryDateTime.Date ==  DateTime.Now.Date)
             {
-                if (order.OrderStatus == "Pending" && order.DeliveryDateTime.Date == DateTime.Now.Date)
-                {
-                    orderqueue.Enqueue(order);
-                }
+                orderqueue.Enqueue(order);
             }
         }
-
-        Console.WriteLine($"Total Pending Order Queues for Today: {orderqueue.Count}");
-
-        int rejectedCount = 0;
-        int preparingCount = 0;
-        int processedCount;
-        foreach (Order order in orderqueue)
-        {
-            TimeSpan diff = order.DeliveryDateTime - DateTime.Now;
-            if (diff.TotalMinutes < 60)
-            {
-                order.OrderStatus = "Rejected";
-                rejectedCount += 1;
-                refundStack.Push(order);
-            }
-            else
-            {
-                order.OrderStatus = "Preparing";
-                preparingCount += 1;
-            }
-        }
-        processedCount = rejectedCount + preparingCount;
-        double doubleProcessed = Convert.ToDouble(processedCount);
-        double percent = (doubleProcessed / orders.Count) * 100;
-        Console.WriteLine("");
-        Console.WriteLine($"Total Orders Processed for Today: {processedCount}");
-        Console.WriteLine($"Preparing: {preparingCount} Rejected: {rejectedCount}");
-        Console.WriteLine($"Percentage of automatically processed orders against all orders: {percent.ToString("0.00")}%");
-        Console.WriteLine("");
-
-
     }
+
+    Console.WriteLine($"Total Pending Order Queues for Today: {orderqueue.Count}");
+
+    int rejectedCount = 0;
+    int preparingCount = 0;
+    int processedCount;
+    foreach (Order order in orderqueue)
+    {
+        TimeSpan diff = order.DeliveryDateTime - DateTime.Now;
+        if (diff.TotalMinutes < 60)
+        {
+            order.OrderStatus = "Rejected";
+            rejectedCount += 1;
+            refundStack.Push(order);
+        }
+        else
+        {
+            order.OrderStatus = "Preparing";
+              preparingCount += 1;
+        }
+    }
+    processedCount = rejectedCount + preparingCount;
+    double doubleProcessed = Convert.ToDouble(processedCount);
+    double percent = (doubleProcessed / orders.Count) * 100;
+    Console.WriteLine("");
+    Console.WriteLine($"Total Orders Processed for Today: {processedCount}");
+    Console.WriteLine($"Preparing: {preparingCount} Rejected: {rejectedCount}");
+    Console.WriteLine($"Percentage of automatically processed orders against all orders: {percent.ToString("0.00")}%");
+    Console.WriteLine("");
+
+
 }
 
