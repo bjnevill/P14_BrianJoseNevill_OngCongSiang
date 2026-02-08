@@ -13,6 +13,7 @@ Dictionary<string, Restaurant> restaurants = LoadRestaurants();
 Dictionary<string, FoodItem> foodItems = LoadFoodItems(restaurants);
 Dictionary<string, Customer> customers = LoadCustomer();
 Dictionary<int, Order> orders = LoadOrders(customers, restaurants, foodItems);
+LoadFavouruite();
 
 Stack<Order> refundStack = new Stack<Order>();
 
@@ -25,7 +26,7 @@ Console.WriteLine("");
 
 
 
-int choice;
+string choice;
 do
 {
     Console.WriteLine("===== Gruberoo Food Delivery System =====");
@@ -37,15 +38,16 @@ do
     Console.WriteLine("6. Delete an existing order");
     Console.WriteLine("7. Bulk processing of unprocessed orders for a current day");
     Console.WriteLine("8. Display total order amount");
+    Console.WriteLine("9. Favoruite Orders");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
-    choice = Convert.ToInt32(Console.ReadLine());
+    choice = Console.ReadLine();
     Console.WriteLine("");
-    if (choice == 0)
+    if (choice == "0")
     {
         Console.WriteLine("Exiting...");
     }
-    else if (choice == 1)
+    else if (choice == "1")
     {
         while (true)
         {
@@ -85,7 +87,7 @@ do
             Console.Clear();
         }
     }
-    else if (choice == 2)
+    else if (choice == "2")
     {
         Console.WriteLine("All Orders");
         Console.WriteLine("==========");
@@ -99,11 +101,11 @@ do
         }
         Console.WriteLine("");
     }
-    else if (choice == 3)
+    else if (choice == "3")
     {
         CreateNewOrder();
     }
-    else if (choice == 4)
+    else if (choice == "4")
     {
         Console.WriteLine("Process Order");
         Console.WriteLine("=============");
@@ -168,21 +170,26 @@ do
             Console.WriteLine("");
         }
     }
-    else if (choice == 5)
+    else if (choice == "5")
     {
         ModifyOrder();
     }
-    else if (choice == 6)
+    else if (choice == "6")
     {
         DeleteOrder(orders.Values.ToList(), refundStack);
     }
-    else if (choice == 7)
+    else if (choice == "7")
     {
         BulkOrder();
     }
-    else if (choice == 8)
+    else if (choice == "8")
     {
         DisplayTotals(restaurants);
+    }
+    else if (choice == "9")
+    {
+        FavouriteOrder();
+
     }
     else
     {
@@ -190,7 +197,9 @@ do
 
     }
 
-} while (choice != 0);
+    Console.WriteLine("");
+
+} while (choice != "0");
 Console.WriteLine("Thank you for using Gruberoo Food Delivery System. Goodbye!");
 
 List<Order> queueList = new List<Order>();
@@ -207,11 +216,52 @@ foreach (Restaurant restaurant in restaurants.Values)
 List<Order> refundList = refundStack.ToList();
 SaveOrdersToCsv(queueList, "queue.csv");
 SaveOrdersToCsv(refundList, "stack.csv");
+SaveFavouritesToCsv();
 
+void SaveFavouritesToCsv()
+{
+    string data = "";
+    string itemline;
+
+    foreach (Customer customer in customers.Values)
+    {
+        foreach (Favourite fav in customer.Favourites)
+        {
+            string custEmail = customer.EmailAdress;
+            string favouriteName = fav.FavoruiteName;
+            string restaurantId = fav.RestuarantId;
+
+            string items = "";
+            foreach (OrderedFoodItem ofi in fav.Items)
+            {
+                items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
+            }
+            items = items.Trim('|');
+            itemline = $"\"{items}\"";
+
+            string specialRequest = fav.SpecialRequest;
+            if (specialRequest == "-")
+            {
+                specialRequest = "-";
+            }
+
+            data += $"{custEmail},{favouriteName},{restaurantId},{itemline},{specialRequest}\n";
+        }
+    }
+
+    data = data.Trim('\n');
+
+    using (StreamWriter sw = new StreamWriter("favourite.csv", false))
+    {
+        sw.WriteLine("CustomerEmail,FavouriteName,RestaurantId,Items,SpecialRequest");
+        sw.WriteLine(data);
+    }
+}
 
 void SaveOrdersToCsv(List<Order> orderList, string filename)
 {
     string data = "";
+    string itemline;
     foreach (Order order in orderList)
     {
         int orderid = order.OrderId;
@@ -229,7 +279,8 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
             items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
         }
         items = items.Trim('|');
-        data += $"{orderid},{custEmail},{restaurantId},{deliveryDate},{deliveryTime},{deliveryAddress},{createdDateTime},{totalAmount},{status},{items}\n";
+        itemline = $"\"{items}\"";
+        data += $"{orderid},{custEmail},{restaurantId},{deliveryDate},{deliveryTime},{deliveryAddress},{createdDateTime},{totalAmount},{status},{itemline}\n";
     }
 
     data = data.Trim('\n');
@@ -462,6 +513,42 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
     return orders;
 
 }
+
+void LoadFavouruite()
+{
+
+    string[] data = File.ReadAllLines("favourite.csv");
+    for (int i = 1; i < data.Length; i++)
+    {
+        string[] split = data[i].Split('"');
+        if (split.Length < 2)
+        {
+            continue;
+        }
+
+        string[] favData = split[0].Split(',');
+        string email = favData[0];
+        string name = favData[1];
+        string id = favData[2];
+        string specialRequest = split[2];
+        string[] items = split[1].Split('|');
+        Favourite favOrder = new Favourite(name, id, specialRequest);
+        for (int j = 0; j < items.Length; j++)
+        {
+            string[] item = items[j].Split(',');
+            int quantity;
+            quantity = Convert.ToInt32(item[1]);
+            string itemName = item[0];
+            string desc = foodItems[itemName].ItemDesc;
+            double price = foodItems[itemName].ItemPrice;
+            favOrder.Items.Add(new OrderedFoodItem(itemName, desc, price, quantity));
+        }
+        customers[email].Favourites.Add(favOrder);
+
+    }
+
+}
+
 
 
 static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
@@ -966,7 +1053,10 @@ void ModifyOrder()
                             continue;
                         }
 
-                        if (newqty > 0) break;
+                        if (newqty > 0)
+                        {
+                            break;
+                        }
 
                         Console.WriteLine("Quantity must be more than 0. Try again!");
                     }
@@ -1199,8 +1289,8 @@ void BulkOrder()
     int processedCount;
     foreach (Order order in orderqueue)
     {
-        TimeSpan diff = order.DeliveryDateTime - DateTime.Now;
-        if (diff.TotalMinutes < 60)
+        int diff = order.DeliveryDateTime.Subtract(DateTime.Now).Minutes;
+        if (diff < 60)
         {
             order.OrderStatus = "Rejected";
             rejectedCount += 1;
@@ -1223,4 +1313,312 @@ void BulkOrder()
 
 
 }
+
+void FavouriteOrder()
+{
+    Customer customer;
+    while (true)
+    {
+        Console.Write("Enter customer email:");
+        string email = Console.ReadLine();
+        if (customers.ContainsKey(email))
+        {
+            customer = customers[email];
+            break;
+        }
+        else
+        {
+            Console.WriteLine("Invalid Email.Please Try Again");
+        }
+    }
+    Console.WriteLine("");
+    Console.WriteLine("1.Add Favourite Order");
+    Console.WriteLine("2.Reorder Favoruite Order");
+    Console.WriteLine("3.Delete Favourite Order");
+    Console.Write("Choose Option:");
+    string opt = Console.ReadLine();
+    if (opt == "2")
+    {
+        if (customer.Favourites.Count > 0)
+        {
+            int num = 1;
+            foreach (Favourite fav in customer.Favourites)
+            {
+                Console.WriteLine($"{num}.{fav.FavoruiteName}");
+                num += 1;
+            }
+            int chose;
+            Favourite chosen;
+            while (true)
+            {
+                Console.WriteLine("");
+                Console.Write("Choose Order to Order: ");
+                try
+                {
+                    chose = Convert.ToInt32(Console.ReadLine());
+                    if (chose < 1 || chose > customer.Favourites.Count)
+                    {
+                        Console.WriteLine("Invalid item number. Try Again!");
+                    }
+                    chosen = customer.Favourites[chose - 1];
+                    break;
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid Option");
+                }
+            }
+            DateTime deliveryDateTime;
+            while (true)
+            {
+                Console.Write("Enter Delivery Date (dd/mm/yyyy): ");
+                string date = Console.ReadLine();
+                Console.Write("Enter Delivery Time (hh:mm): ");
+                string time = Console.ReadLine();
+                string sdatetime = date + " " + time;
+                try
+                {
+                    deliveryDateTime = Convert.ToDateTime(sdatetime);
+                    break;
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid delivery date/time. Use dd/MM/yyyy and HH:mm.");
+                }
+            }
+
+            Console.Write("Enter Delivery Address: ");
+            string address = Console.ReadLine();
+            Console.WriteLine("");
+
+            double subtotal = 0;
+            foreach (OrderedFoodItem item in chosen.Items)
+            {
+                subtotal += item.CalculateSubTotal();
+            }
+            double total = subtotal + 5;
+            Console.WriteLine("");
+            Console.WriteLine($"Order total: ${subtotal.ToString("0.00")} + $5.00 (delivery) = ${total.ToString("0.00")}");
+            string paymentMethod = "-";
+            string paymentOption;
+            while (true)
+            {
+                Console.Write("Proceed to payment? [Y/N]: ");
+                paymentOption = Console.ReadLine();
+                Console.WriteLine("");
+                if (paymentOption != "Y" && paymentOption != "N")
+                {
+                    Console.WriteLine("Invalid Option");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            if (paymentOption == "Y")
+            {
+                while (true)
+                {
+                    Console.Write("Payment method:\n[CC] Credit Card / [PP] PayPal / [CD] Cash on Delivery: ");
+                    paymentMethod = Console.ReadLine();
+                    if (paymentMethod == "CC" || paymentMethod == "PP" || paymentMethod == "CD")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid Option");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("See you again!");
+                return;
+            }
+
+            int maxOrderId = 0;
+            foreach (Order o in orders.Values)
+            {
+                if (o.OrderId > maxOrderId)
+                {
+                    maxOrderId = o.OrderId;
+                }
+            }
+
+            Order order = new Order(maxOrderId + 1, DateTime.Now, total, "Pending", deliveryDateTime, address, paymentMethod, true, customer, restaurants[chosen.RestuarantId], chosen.SpecialRequest);
+
+            foreach (OrderedFoodItem item in chosen.Items)
+            {
+                order.AddOrderedFoodItem(new OrderedFoodItem(item.ItemName, item.ItemDesc, item.ItemPrice, item.QtyOrdered));
+            }
+
+            restaurants[chosen.RestuarantId].Orders.Enqueue(order);
+            customer.AddOrder(order);
+            orders[order.OrderId] = order;
+            string items = "";
+            foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
+            {
+                items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
+            }
+            items = items.Trim('|');
+            string line;
+            using (StreamWriter sw = new StreamWriter("orders.csv", true))
+            {
+                sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{items}");
+            }
+
+
+            Console.WriteLine("");
+            Console.WriteLine($"Order {order.OrderId} created successfully! Status: {order.OrderStatus}");
+            Console.WriteLine("");
+
+        }
+        else
+        {
+            Console.WriteLine("Custoemr has no favoruite orders.");
+            return;
+        }
+    }
+
+    else if (opt == "3")
+    {
+        if (customer.Favourites.Count == 0)
+        {
+            Console.WriteLine("Customer has no favourite orders.");
+            return;
+        }
+
+        Console.WriteLine("Favourite Orders");
+        Console.WriteLine("================");
+        for (int i = 0; i < customer.Favourites.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {customer.Favourites[i].FavoruiteName}");
+        }
+
+        int choice;
+        while (true)
+        {
+            try
+            {
+                Console.Write("Please enter a number: ");
+                choice = Convert.ToInt32(Console.ReadLine());
+                
+            }
+            catch
+            {
+                Console.WriteLine("Please enter a number.");
+                continue;
+            }
+
+            if (choice < 1 || choice > customer.Favourites.Count)
+            {
+                Console.WriteLine("Invalid selection.");
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        while (true)
+        {
+            Console.Write($"Confirm delete '{customer.Favourites[choice - 1].FavoruiteName}'? [Y/N]: ");
+            string confirm = Console.ReadLine();
+
+            if (confirm == "Y")
+            {
+                customer.Favourites.RemoveAt(choice - 1);
+                Console.WriteLine("Favourite order deleted.");
+                break;
+            }
+            else if (confirm == "N")
+            {
+                Console.WriteLine("Deletion Cancelled.");
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Please provide valid input Y or N");
+            }
+        }
+    }
+    else if (opt == "1")
+    {
+        if (customer.Orders.Count == 0)
+        {
+            Console.WriteLine("Customer has no orders to favourite.");
+            return;
+        }
+
+        Console.WriteLine("Customer Orders");
+        Console.WriteLine("===============");
+        foreach (Order o in customer.Orders)
+        {
+            Console.WriteLine($"{o.OrderId} - {o.Restaurant.RestaurantName}");
+        }
+
+        int orderId;
+        Order selectedOrder;
+        while (true)
+        {
+            Console.Write("Enter Order ID to save as favourite: ");
+            try
+            {
+                orderId = Convert.ToInt32(Console.ReadLine());
+            }
+            catch
+            {
+                Console.WriteLine("Order ID must be a number.");
+                continue;
+            }
+
+            selectedOrder = null;
+
+            foreach (Order o in customer.Orders)
+            {
+                if (o.OrderId == orderId)
+                {
+                    selectedOrder = o;
+                    break;
+                }
+            }
+
+            if (selectedOrder == null)
+            {
+                Console.WriteLine("Invalid Order ID. Try again.");
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        Console.Write("Enter Favourite Name: ");
+        string favName = Console.ReadLine();
+        if (favName == "")
+        {
+            favName = $"Favourite-{selectedOrder.OrderId}";
+        }
+
+        Favourite fav = new Favourite(favName, selectedOrder.Restaurant.RestaurantId, selectedOrder.SpecialRequest);
+
+        foreach (OrderedFoodItem item in selectedOrder.OrderedFoodItems)
+        {
+            fav.Items.Add(new OrderedFoodItem(item.ItemName, item.ItemDesc, item.ItemPrice, item.QtyOrdered));
+        }
+
+        customer.Favourites.Add(fav);
+
+        Console.WriteLine($"Favourite order '{fav.FavoruiteName}' added successfully.");
+    }
+
+    else
+    {
+        Console.WriteLine("Inavlid Option. Try Again.");
+    }
+
+}
+    
 
