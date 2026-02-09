@@ -1,7 +1,7 @@
 ﻿//==========================================================
 // Student Number : S10274174G
-// Student Name : Brian Jose Nevill - Questions:2,3,5,7
-// Partner Name : Ong Cong Siang - Questions:1,4,6,8
+// Student Name : Brian Jose Nevill - Questions:2,3,5,7, Advanced Feature: Bulk Processing, Bonus Feature: Favourite Orders
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Restaurant Sub Menu, Bonus Feature: Display Total
 //==========================================================
 
 using S10274174G_PRG2Assignment;
@@ -49,6 +49,8 @@ do
     }
     else if (choice == "1")
     {
+
+        // Student Name : Brian Jose Nevill - Basic Feature - 3
         while (true)
         {
             Console.WriteLine("\nRestaurants");
@@ -89,6 +91,7 @@ do
     }
     else if (choice == "2")
     {
+        // Partner Name : Ong Cong Siang - Basic Feature - 1
         Console.WriteLine("All Orders");
         Console.WriteLine("==========");
         Console.WriteLine($"{"Order ID",-12}{"Customer",-14}{"Restaurant",-17}{"Delivery Date/Time",-22}{"Amount",-10}{"Status",-10}");
@@ -157,6 +160,8 @@ SaveOrdersToCsv(queueList, "queue.csv");
 SaveOrdersToCsv(refundList, "stack.csv");
 SaveFavouritesToCsv();
 
+
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void SaveFavouritesToCsv()
 {
     string data = "";
@@ -232,7 +237,7 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
 
 
 
-
+// Partner Name : Ong Cong Siang - Bonus Feature - Disyplay Total 
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
     const double DELIVERY_FEE = 5.00;
@@ -279,6 +284,7 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
     Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
 }
 
+// Partner Name : Ong Cong Siang - Advanced Feature - Restaurarant Sub Menu
 void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
 {
     while (true)
@@ -320,7 +326,7 @@ void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
     }
 }
 
-
+// Partner Name : Ong Cong Siang - Basic Feature - 4
 Dictionary<string, Restaurant> LoadRestaurants()
 {
     Dictionary<string, Restaurant> restaurants = new Dictionary<string, Restaurant>();
@@ -340,6 +346,7 @@ Dictionary<string, Restaurant> LoadRestaurants()
     return restaurants;
 }
 
+// Partner Name : Ong Cong Siang - Basic Feature - 4
 Dictionary<string, FoodItem> LoadFoodItems(Dictionary<string, Restaurant> restaurants)
 {
     Dictionary<string, FoodItem> foodItems = new Dictionary<string, FoodItem>();
@@ -388,6 +395,7 @@ Dictionary<string, FoodItem> LoadFoodItems(Dictionary<string, Restaurant> restau
     return foodItems;
 }
 
+// Student Name : Brian Jose Nevill - Basic Feature - 2
 Dictionary<string, Customer> LoadCustomer()
 {
     Dictionary<string, Customer> customers = new Dictionary<string, Customer>();
@@ -403,6 +411,7 @@ Dictionary<string, Customer> LoadCustomer()
 
 }
 
+// Student Name : Brian Jose Nevill - Basic Feature - 2
 Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictionary<string, Restaurant> restaurants, Dictionary<string, FoodItem> foodItems)
 {
     Dictionary<int, Order> orders = new Dictionary<int, Order>();
@@ -453,6 +462,7 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
 
 }
 
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void LoadFavouruite()
 {
 
@@ -489,7 +499,7 @@ void LoadFavouruite()
 }
 
 
-
+// Partner Name : Ong Cong Siang - Basic Feature - 8
 void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
     Console.WriteLine("Delete Order");
@@ -603,6 +613,8 @@ void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
     }
 }
 
+
+// Student Name : Brian Jose Nevill - Basic Feature - 5
 void CreateNewOrder()
 {
     Console.WriteLine("Create New Order");
@@ -811,11 +823,13 @@ void CreateNewOrder()
     customers[email].AddOrder(order);
     orders[order.OrderId] = order;
     string items = "";
+    string itemline;
     foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
     {
         items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
     }
     items = items.Trim('|');
+    itemline = $"\"{items}\"";
     string line;
     using (StreamWriter sw = new StreamWriter("orders.csv", true))
     {
@@ -828,6 +842,8 @@ void CreateNewOrder()
     Console.WriteLine("");
 }
 
+
+// Student Name : Brian Jose Nevill - Basic Feature - 7
 void ModifyOrder()
 {
     Console.WriteLine("Modify Order");
@@ -1202,6 +1218,8 @@ void ModifyOrder()
     }
 }
 
+
+// Student Name : Brian Jose Nevill - Advanced Feature - Bulk Order Processing
 void BulkOrder()
 {
     Queue<Order> orderqueue = new Queue<Order>();
@@ -1248,6 +1266,7 @@ void BulkOrder()
 
 }
 
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void FavouriteOrder()
 {
     Customer customer;
@@ -1391,11 +1410,13 @@ void FavouriteOrder()
             customer.AddOrder(order);
             orders[order.OrderId] = order;
             string items = "";
+            string itemline;
             foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
             {
                 items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
             }
             items = items.Trim('|');
+            itemline = $"\"{items}\"";
             string line;
             using (StreamWriter sw = new StreamWriter("orders.csv", true))
             {
@@ -1490,8 +1511,18 @@ void FavouriteOrder()
         Console.WriteLine("===============");
         foreach (Order o in customer.Orders)
         {
-            Console.WriteLine($"{o.OrderId} - {o.Restaurant.RestaurantName}");
+            string items = "";
+
+            foreach (OrderedFoodItem item in o.OrderedFoodItems)
+            {
+                items += $"{item.ItemName} x{item.QtyOrdered}, ";
+            }
+
+            items = items.TrimEnd(',', ' ');
+
+            Console.WriteLine($"{o.OrderId} - {o.Restaurant.RestaurantName} [{items}]");
         }
+
 
         int orderId;
         Order selectedOrder;
@@ -1555,7 +1586,7 @@ void FavouriteOrder()
 
 }
 
-
+// Partner Name : Ong Cong Siang - Basic Feature - 6
 void ProcessOrder()
 {
     Console.WriteLine("Process Order");
