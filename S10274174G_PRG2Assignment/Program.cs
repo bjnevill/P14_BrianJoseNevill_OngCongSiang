@@ -107,68 +107,7 @@ do
     }
     else if (choice == "4")
     {
-        Console.WriteLine("Process Order");
-        Console.WriteLine("=============");
-        Console.Write("Enter Restaurant ID: ");
-        string restaurantId = Console.ReadLine();
-
-        if (!restaurants.ContainsKey(restaurantId))
-        {
-            Console.WriteLine("Invalid Restaurant ID.");
-            Console.WriteLine("");
-            continue;
-        }
-
-        Queue<Order> orderQueue = restaurants[restaurantId].Orders;
-
-        int count = orderQueue.Count;
-
-        for (int i = 0; i < count; i++)
-        {
-            Order order = orderQueue.Dequeue();
-
-            order.DisplayForProcessing();
-            Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
-            string option = Console.ReadLine().ToUpper();
-
-            switch (option)
-            {
-                case "C":
-                    if (order.ConfirmOrder())
-                        Console.WriteLine($"Order {order.OrderId} confirmed. Status: Preparing");
-                    else
-                        Console.WriteLine("Order cannot be confirmed.");
-                    break;
-
-                case "R":
-                    if (order.RejectOrder(refundStack))
-                        Console.WriteLine("Order rejected. Refund initiated.");
-                    else
-                        Console.WriteLine("Order cannot be rejected.");
-                    break;
-
-                case "S":
-                    if (order.SkipOrder())
-                        Console.WriteLine("Order skipped.");
-                    else
-                        Console.WriteLine("Only cancelled orders can be skipped.");
-                    break;
-
-                case "D":
-                    if (order.DeliverOrder())
-                        Console.WriteLine($"Order {order.OrderId} delivered successfully.");
-                    else
-                        Console.WriteLine("Order cannot be delivered.");
-                    break;
-
-                default:
-                    Console.WriteLine("Invalid option.");
-                    break;
-            }
-
-            orderQueue.Enqueue(order);
-            Console.WriteLine("");
-        }
+        ProcessOrder();
     }
     else if (choice == "5")
     {
@@ -355,7 +294,7 @@ void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
         string input = Console.ReadLine().Trim();
 
         if (input == "0")
-            break; 
+            break;
 
         if (!restaurants.ContainsKey(input))
         {
@@ -551,12 +490,11 @@ void LoadFavouruite()
 
 
 
-static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
+void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
     Console.WriteLine("Delete Order");
     Console.WriteLine("============");
 
-    // Email input validation
     Console.Write("Enter Customer Email: ");
     string email = (Console.ReadLine() ?? "").Trim();
 
@@ -566,7 +504,6 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         return;
     }
 
-    // Find pending orders for customer (NO constants needed, safe for spacing/case)
     List<Order> pendingOrders = new List<Order>();
 
     foreach (Order o in orderList)
@@ -628,7 +565,6 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         return;
     }
 
-    // Display order details
     Console.WriteLine($"\nCustomer: {selectedOrder.Customer.CustomerName}");
     Console.WriteLine("Ordered Items:");
 
@@ -643,7 +579,6 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
     Console.WriteLine($"Total Amount: ${selectedOrder.OrderTotal:0.00}");
     Console.WriteLine($"Order Status: {selectedOrder.OrderStatus}");
 
-    // Confirm deletion validation
     Console.Write("\nConfirm deletion? [Y/N]: ");
     string confirm = (Console.ReadLine() ?? "").Trim().ToUpper();
 
@@ -655,7 +590,6 @@ static void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 
     if (confirm == "Y")
     {
-        // Cancel order + push to refund stack
         selectedOrder.OrderStatus = "Cancelled";
         refundStack.Push(selectedOrder);
 
@@ -1503,7 +1437,7 @@ void FavouriteOrder()
             {
                 Console.Write("Please enter a number: ");
                 choice = Convert.ToInt32(Console.ReadLine());
-                
+               
             }
             catch
             {
@@ -1620,5 +1554,111 @@ void FavouriteOrder()
     }
 
 }
-    
 
+
+void ProcessOrder()
+{
+    Console.WriteLine("Process Order");
+    Console.WriteLine("=============");
+
+    string restaurantId;
+    while (true)
+    {
+        Console.Write("Enter Restaurant ID: ");
+        restaurantId = Console.ReadLine();
+
+        if (restaurants.ContainsKey(restaurantId))
+            break;
+
+        Console.WriteLine("Invalid Restaurant ID.");
+    }
+
+    Queue<Order> orderQueue = restaurants[restaurantId].Orders;
+
+    if (orderQueue.Count == 0)
+    {
+        Console.WriteLine("No orders found for this restaurant.");
+        return;
+    }
+
+    int count = orderQueue.Count;
+
+    for (int i = 0; i < count; i++)
+    {
+        Order order = orderQueue.Dequeue();
+
+        if (order.OrderStatus != Order.STATUS_PENDING &&
+            order.OrderStatus != Order.STATUS_CANCELLED &&
+            order.OrderStatus != Order.STATUS_PREPARING)
+        {
+            orderQueue.Enqueue(order);
+            continue;
+        }
+
+        order.DisplayForProcessing();
+
+        string option;
+        while (true)
+        {
+            Console.Write("[C]onfirm / [R]eject / [S]kip / [D]eliver: ");
+            option = Console.ReadLine().Trim().ToUpper();
+
+            if (option == "C" || option == "R" || option == "S" || option == "D")
+                break;
+
+            Console.WriteLine("Invalid option.");
+        }
+
+        if (option == "C")
+        {
+            if (order.OrderStatus == Order.STATUS_PENDING)
+            {
+                order.OrderStatus = Order.STATUS_PREPARING;
+                Console.WriteLine($"Order {order.OrderId} confirmed. Status: Preparing");
+            }
+            else
+            {
+                Console.WriteLine("Order cannot be confirmed.");
+            }
+        }
+        else if (option == "R")
+        {
+            if (order.OrderStatus == Order.STATUS_PENDING)
+            {
+                order.OrderStatus = Order.STATUS_REJECTED;
+                refundStack.Push(order);
+                Console.WriteLine("Order rejected. Refund initiated.");
+            }
+            else
+            {
+                Console.WriteLine("Order cannot be rejected.");
+            }
+        }
+        else if (option == "S")
+        {
+            if (order.OrderStatus == Order.STATUS_CANCELLED)
+            {
+                Console.WriteLine("Order skipped.");
+            }
+            else
+            {
+                Console.WriteLine("Only cancelled orders can be skipped.");
+            }
+        }
+        else // D
+        {
+            if (order.OrderStatus == Order.STATUS_PREPARING)
+            {
+                order.OrderStatus = Order.STATUS_DELIVERED;
+                Console.WriteLine($"Order {order.OrderId} delivered successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Order cannot be delivered.");
+            }
+        }
+
+        orderQueue.Enqueue(order);
+        Console.WriteLine("");
+    }
+}
