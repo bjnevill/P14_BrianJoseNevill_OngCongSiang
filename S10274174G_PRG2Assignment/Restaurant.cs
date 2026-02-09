@@ -18,7 +18,7 @@ namespace S10274174G_PRG2Assignment
         private string restaurantName;
         private string restaurantEmail;
         private List<Menu> menus;
-        private List<SpecialOffer>? specialOffers;
+        private List<SpecialOffer> specialOffers;
         private Queue<Order> orders;
 
         public string RestaurantId

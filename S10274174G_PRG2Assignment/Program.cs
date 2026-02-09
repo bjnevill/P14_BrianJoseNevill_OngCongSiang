@@ -38,7 +38,8 @@ do
     Console.WriteLine("6. Delete an existing order");
     Console.WriteLine("7. Bulk processing of unprocessed orders for a current day");
     Console.WriteLine("8. Display total order amount");
-    Console.WriteLine("9. Favoruite Orders");
+    Console.WriteLine("9. Favourite Orders");
+    Console.WriteLine("10. Analytics Dashboard (Business Insights)");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Console.ReadLine();
@@ -51,42 +52,14 @@ do
     {
 
         // Student Name : Brian Jose Nevill - Basic Feature - 3
-        while (true)
+
+        Console.WriteLine("All Restaurants and Menu Items");
+        Console.WriteLine("==============================");
+
+        foreach (Restaurant restaurant in restaurants.Values)
         {
-            Console.WriteLine("\nRestaurants");
-            Console.WriteLine("===========");
-            foreach (var r in restaurants.Values)
-            {
-                Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
-            }
-
-            Console.Write("Select Restaurant ID (0 to go back): ");
-            string input = Console.ReadLine().Trim();
-
-            if (input == "0")
-                break;
-
-            if (!restaurants.ContainsKey(input))
-            {
-                Console.WriteLine("Invalid Restaurant ID.");
-                continue;
-            }
-
-            Restaurant selected = restaurants[input];
-
-            Console.WriteLine($"\n{selected.RestaurantName} Menu:");
-            foreach (Menu menu in selected.Menus)
-            {
-                Console.WriteLine($"Menu: {menu.MenuName}");
-                foreach (FoodItem item in menu.FoodItems)
-                {
-                    Console.WriteLine(item.ToString());
-                }
-            }
-
-            Console.WriteLine("\nPress any key to return to the restaurant list...");
-            Console.ReadKey();
-            Console.Clear();
+            restaurant.DisplayMenus();
+            Console.WriteLine();
         }
     }
     else if (choice == "2")
@@ -133,6 +106,11 @@ do
         FavouriteOrder();
 
     }
+    else if (choice == "10")
+    {
+        AnalyticsDashboard();
+    }
+
     else
     {
         Console.WriteLine("Inavlid Option");
@@ -237,7 +215,7 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
 
 
 
-// Partner Name : Ong Cong Siang - Bonus Feature - Disyplay Total 
+// Partner Name : Ong Cong Siang - Advanced Feature - Disyplay Total 
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
     const double DELIVERY_FEE = 5.00;
@@ -284,47 +262,7 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
     Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
 }
 
-// Partner Name : Ong Cong Siang - Advanced Feature - Restaurarant Sub Menu
-void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
-{
-    while (true)
-    {
-        Console.WriteLine("\nRestaurants");
-        Console.WriteLine("===========");
-        foreach (var r in restaurants.Values)
-        {
-            Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
-        }
 
-        Console.Write("Select Restaurant ID (0 to go back): ");
-        string input = Console.ReadLine().Trim();
-
-        if (input == "0")
-            break;
-
-        if (!restaurants.ContainsKey(input))
-        {
-            Console.WriteLine("Invalid Restaurant ID.");
-            continue;
-        }
-
-        Restaurant selected = restaurants[input];
-
-        Console.WriteLine($"\n{selected.RestaurantName} Menu:");
-        foreach (Menu menu in selected.Menus)
-        {
-            Console.WriteLine($"Menu: {menu.MenuName}");
-            foreach (FoodItem item in menu.FoodItems)
-            {
-                Console.WriteLine(item.ToString());
-            }
-        }
-
-        Console.WriteLine("\nPress any key to return to the restaurant list...");
-        Console.ReadKey();
-        Console.Clear();
-    }
-}
 
 // Partner Name : Ong Cong Siang - Basic Feature - 4
 Dictionary<string, Restaurant> LoadRestaurants()
@@ -1286,7 +1224,7 @@ void FavouriteOrder()
     }
     Console.WriteLine("");
     Console.WriteLine("1.Add Favourite Order");
-    Console.WriteLine("2.Reorder Favoruite Order");
+    Console.WriteLine("2.Reorder Favouruite Order");
     Console.WriteLine("3.Delete Favourite Order");
     Console.Write("Choose Option:");
     string opt = Console.ReadLine();
@@ -1692,4 +1630,180 @@ void ProcessOrder()
         orderQueue.Enqueue(order);
         Console.WriteLine("");
     }
+}
+
+
+// Partner Name : Ong Cong Siang - Bonus Feature - Analytics
+void AnalyticsDashboard()
+{
+    Console.WriteLine("Analytics Dashboard (Insights)");
+    Console.WriteLine("==============================");
+
+    if (orders.Count == 0)
+    {
+        Console.WriteLine("No orders in system.");
+        return;
+    }
+
+    // ----- Overall counters -----
+    int totalOrders = 0;
+    int deliveredCount = 0;
+    int pendingCount = 0;
+    int preparingCount = 0;
+    int cancelledCount = 0;
+    int rejectedCount = 0;
+
+    // Avg order value (DELIVERED only, so it doesn't overlap refund totals)
+    double deliveredTotalValue = 0;
+
+    // Item popularity (by qty, across ALL orders)
+    Dictionary<string, int> itemQty = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+    // Peak times (by delivery hour, across ALL orders)
+    Dictionary<int, int> deliveryHourCount = new Dictionary<int, int>();
+
+    // Restaurant performance (counts + rates, not money)
+    Dictionary<string, int> restTotal = new Dictionary<string, int>();
+    Dictionary<string, int> restDelivered = new Dictionary<string, int>();
+    Dictionary<string, int> restRefunded = new Dictionary<string, int>(); // cancelled + rejected
+
+    foreach (Order o in orders.Values)
+    {
+        totalOrders++;
+
+        // status breakdown
+        if (o.OrderStatus == Order.STATUS_DELIVERED) deliveredCount++;
+        else if (o.OrderStatus == Order.STATUS_PENDING) pendingCount++;
+        else if (o.OrderStatus == Order.STATUS_PREPARING) preparingCount++;
+        else if (o.OrderStatus == Order.STATUS_CANCELLED) cancelledCount++;
+        else if (o.OrderStatus == Order.STATUS_REJECTED) rejectedCount++;
+
+        // delivered average value (only)
+        if (o.OrderStatus == Order.STATUS_DELIVERED)
+            deliveredTotalValue += o.OrderTotal;
+
+        // item qty
+        foreach (OrderedFoodItem item in o.OrderedFoodItems)
+        {
+            if (!itemQty.ContainsKey(item.ItemName))
+                itemQty[item.ItemName] = 0;
+
+            itemQty[item.ItemName] += item.QtyOrdered;
+        }
+
+        // peak delivery hour
+        int hr = o.DeliveryDateTime.Hour;
+        if (!deliveryHourCount.ContainsKey(hr))
+            deliveryHourCount[hr] = 0;
+        deliveryHourCount[hr]++;
+
+        // restaurant performance counts
+        string rid = o.Restaurant.RestaurantId;
+
+        if (!restTotal.ContainsKey(rid)) restTotal[rid] = 0;
+        if (!restDelivered.ContainsKey(rid)) restDelivered[rid] = 0;
+        if (!restRefunded.ContainsKey(rid)) restRefunded[rid] = 0;
+
+        restTotal[rid]++;
+
+        if (o.OrderStatus == Order.STATUS_DELIVERED)
+            restDelivered[rid]++;
+
+        if (o.OrderStatus == Order.STATUS_CANCELLED || o.OrderStatus == Order.STATUS_REJECTED)
+            restRefunded[rid]++;
+    }
+
+    // ----- Derived metrics -----
+    int refundedCount = cancelledCount + rejectedCount;
+    double deliveredRate = totalOrders == 0 ? 0 : (deliveredCount * 100.0 / totalOrders);
+    double refundRate = totalOrders == 0 ? 0 : (refundedCount * 100.0 / totalOrders);
+    double avgDeliveredOrderValue = deliveredCount == 0 ? 0 : (deliveredTotalValue / deliveredCount);
+
+    // ----- Output: Status insight -----
+    Console.WriteLine("\n1) Order Status Breakdown");
+    Console.WriteLine("-------------------------");
+    Console.WriteLine($"Total Orders : {totalOrders}");
+    Console.WriteLine($"Delivered    : {deliveredCount} ({deliveredRate:0.00}%)");
+    Console.WriteLine($"Pending      : {pendingCount}");
+    Console.WriteLine($"Preparing    : {preparingCount}");
+    Console.WriteLine($"Cancelled    : {cancelledCount}");
+    Console.WriteLine($"Rejected     : {rejectedCount}");
+    Console.WriteLine($"Refund Rate  : {refundRate:0.00}%  (Cancelled + Rejected)");
+
+    // ----- Output: Avg order value (delivered only) -----
+    Console.WriteLine("\n2) Delivered Order Value Insight");
+    Console.WriteLine("--------------------------------");
+    if (deliveredCount == 0)
+        Console.WriteLine("No delivered orders yet, so average delivered order value is N/A.");
+    else
+        Console.WriteLine($"Average Delivered Order Value: ${avgDeliveredOrderValue:0.00}");
+
+    // ----- Output: Top items -----
+    Console.WriteLine("\n3) Top 5 Most Ordered Items (by quantity)");
+    Console.WriteLine("-----------------------------------------");
+    if (itemQty.Count == 0)
+    {
+        Console.WriteLine("No items found in orders.");
+    }
+    else
+    {
+        int rank = 1;
+        foreach (var kvp in itemQty.OrderByDescending(x => x.Value).Take(5))
+        {
+            Console.WriteLine($"{rank}. {kvp.Key} - {kvp.Value} qty");
+            rank++;
+        }
+    }
+
+    // ----- Output: Peak hours -----
+    Console.WriteLine("\n4) Peak Delivery Hours (Top 3)");
+    Console.WriteLine("------------------------------");
+    if (deliveryHourCount.Count == 0)
+    {
+        Console.WriteLine("No delivery times found.");
+    }
+    else
+    {
+        foreach (var kvp in deliveryHourCount.OrderByDescending(x => x.Value).Take(3))
+        {
+            Console.WriteLine($"{kvp.Key:00}:00 - {kvp.Value} orders");
+        }
+    }
+
+    // ----- Output: Restaurant leaderboard (rates, not money) -----
+    Console.WriteLine("\n5) Restaurant Performance Leaderboard (by Delivered Rate)");
+    Console.WriteLine("---------------------------------------------------------");
+    // show top 3 by delivered rate (min 1 order)
+    var leaderboard = restTotal.Keys
+        .Select(rid =>
+        {
+            int t = restTotal[rid];
+            int d = restDelivered[rid];
+            int rf = restRefunded[rid];
+            double rate = t == 0 ? 0 : (d * 100.0 / t);
+            return new { rid, total = t, delivered = d, refunded = rf, deliveredRate = rate };
+        })
+        .OrderByDescending(x => x.deliveredRate)
+        .ThenByDescending(x => x.total)
+        .Take(3)
+        .ToList();
+
+    if (leaderboard.Count == 0)
+    {
+        Console.WriteLine("No restaurant data.");
+    }
+    else
+    {
+        int pos = 1;
+        foreach (var r in leaderboard)
+        {
+            string name = restaurants.ContainsKey(r.rid) ? restaurants[r.rid].RestaurantName : "Unknown";
+            Console.WriteLine($"{pos}. {name} ({r.rid}) | Orders: {r.total} | Delivered: {r.delivered} | Refunded: {r.refunded} | Delivered Rate: {r.deliveredRate:0.00}%");
+            pos++;
+        }
+    }
+
+    Console.WriteLine("\nPress any key to return to main menu...");
+    Console.ReadKey();
+    Console.Clear();
 }
