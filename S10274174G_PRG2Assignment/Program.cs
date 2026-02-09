@@ -38,7 +38,7 @@ do
     Console.WriteLine("6. Delete an existing order");
     Console.WriteLine("7. Bulk processing of unprocessed orders for a current day");
     Console.WriteLine("8. Display total order amount");
-    Console.WriteLine("9. Favoruite Orders");
+    Console.WriteLine("9. Favourite Orders");
     Console.WriteLine("0. Exit");
     Console.Write("Enter your choice: ");
     choice = Console.ReadLine();
@@ -49,6 +49,16 @@ do
     }
     else if (choice == "1")
     {
+
+        // Student Name : Brian Jose Nevill - Basic Feature - 3
+        while (true)
+        {
+            Console.WriteLine("\nRestaurants");
+            Console.WriteLine("===========");
+            foreach (var r in restaurants.Values)
+            {
+                Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+            }
 
         // Student Name : Brian Jose Nevill - Basic Feature - 3
 
@@ -157,7 +167,7 @@ void SaveFavouritesToCsv()
         foreach (Favourite fav in customer.Favourites)
         {
             string custEmail = customer.EmailAdress;
-            string favouriteName = fav.FavoruiteName;
+            string favouriteName = fav.FavouriteName;
             string restaurantId = fav.RestuarantId;
 
             string items = "";
@@ -220,9 +230,6 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
     }
 }
 
-
-
-// Partner Name : Ong Cong Siang - Advanced Feature - Display Total
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
     const double DELIVERY_FEE = 5.00;
@@ -267,6 +274,46 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 
     double gruberooEarnings = (grandTotalOrders - grandTotalRefunds) * GRUBEROO_FEE_RATE;
     Console.WriteLine($"Final Amount Gruberoo Earns (30% fee): ${gruberooEarnings:0.00}");
+// Partner Name : Ong Cong Siang - Advanced Feature - Restaurarant Sub Menu
+void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
+{
+    while (true)
+    {
+        Console.WriteLine("\nRestaurants");
+        Console.WriteLine("===========");
+        foreach (var r in restaurants.Values)
+        {
+            Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+        }
+
+        Console.Write("Select Restaurant ID (0 to go back): ");
+        string input = Console.ReadLine().Trim();
+
+        if (input == "0")
+            break;
+
+        if (!restaurants.ContainsKey(input))
+        {
+            Console.WriteLine("Invalid Restaurant ID.");
+            continue;
+        }
+
+        Restaurant selected = restaurants[input];
+
+        Console.WriteLine($"\n{selected.RestaurantName} Menu:");
+        foreach (Menu menu in selected.Menus)
+        {
+            Console.WriteLine($"Menu: {menu.MenuName}");
+            foreach (FoodItem item in menu.FoodItems)
+            {
+                Console.WriteLine(item.ToString());
+            }
+        }
+
+        Console.WriteLine("\nPress any key to return to the restaurant list...");
+        Console.ReadKey();
+        Console.Clear();
+    }
 }
 
 // Partner Name : Ong Cong Siang - Basic Feature - 4
@@ -405,6 +452,7 @@ Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictio
 
 }
 
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void LoadFavouruite()
 {
 
@@ -839,11 +887,13 @@ void CreateNewOrder()
     customers[email].AddOrder(order);
     orders[order.OrderId] = order;
     string items = "";
+    string itemline;
     foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
     {
         items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
     }
     items = items.Trim('|');
+    itemline = $"\"{items}\"";
     string line;
     using (StreamWriter sw = new StreamWriter("orders.csv", true))
     {
@@ -1300,7 +1350,7 @@ void FavouriteOrder()
     }
     Console.WriteLine("");
     Console.WriteLine("1.Add Favourite Order");
-    Console.WriteLine("2.Reorder Favoruite Order");
+    Console.WriteLine("2.Reorder Favourite Order");
     Console.WriteLine("3.Delete Favourite Order");
     Console.Write("Choose Option:");
     string opt = Console.ReadLine();
@@ -1311,7 +1361,7 @@ void FavouriteOrder()
             int num = 1;
             foreach (Favourite fav in customer.Favourites)
             {
-                Console.WriteLine($"{num}.{fav.FavoruiteName}");
+                Console.WriteLine($"{num}.{fav.FavouriteName}");
                 num += 1;
             }
             int chose;
@@ -1424,11 +1474,13 @@ void FavouriteOrder()
             customer.AddOrder(order);
             orders[order.OrderId] = order;
             string items = "";
+            string itemline;
             foreach (OrderedFoodItem ofi in order.OrderedFoodItems)
             {
                 items += $"{ofi.ItemName},{ofi.QtyOrdered}|";
             }
             items = items.Trim('|');
+            itemline = $"\"{items}\"";
             string line;
             using (StreamWriter sw = new StreamWriter("orders.csv", true))
             {
@@ -1443,7 +1495,7 @@ void FavouriteOrder()
         }
         else
         {
-            Console.WriteLine("Custoemr has no favoruite orders.");
+            Console.WriteLine("Custoemr has no favourite orders.");
             return;
         }
     }
@@ -1460,7 +1512,7 @@ void FavouriteOrder()
         Console.WriteLine("================");
         for (int i = 0; i < customer.Favourites.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {customer.Favourites[i].FavoruiteName}");
+            Console.WriteLine($"{i + 1}. {customer.Favourites[i].FavouriteName}");
         }
 
         int choice;
@@ -1491,7 +1543,7 @@ void FavouriteOrder()
 
         while (true)
         {
-            Console.Write($"Confirm delete '{customer.Favourites[choice - 1].FavoruiteName}'? [Y/N]: ");
+            Console.Write($"Confirm delete '{customer.Favourites[choice - 1].FavouriteName}'? [Y/N]: ");
             string confirm = Console.ReadLine();
 
             if (confirm == "Y")
@@ -1523,8 +1575,18 @@ void FavouriteOrder()
         Console.WriteLine("===============");
         foreach (Order o in customer.Orders)
         {
-            Console.WriteLine($"{o.OrderId} - {o.Restaurant.RestaurantName}");
+            string items = "";
+
+            foreach (OrderedFoodItem item in o.OrderedFoodItems)
+            {
+                items += $"{item.ItemName} x{item.QtyOrdered}, ";
+            }
+
+            items = items.TrimEnd(',', ' ');
+
+            Console.WriteLine($"{o.OrderId} - {o.Restaurant.RestaurantName} [{items}]");
         }
+
 
         int orderId;
         Order selectedOrder;
@@ -1578,7 +1640,7 @@ void FavouriteOrder()
 
         customer.Favourites.Add(fav);
 
-        Console.WriteLine($"Favourite order '{fav.FavoruiteName}' added successfully.");
+        Console.WriteLine($"Favourite order '{fav.FavouriteName}' added successfully.");
     }
 
     else
