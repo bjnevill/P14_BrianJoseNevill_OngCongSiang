@@ -1,7 +1,7 @@
 ﻿//==========================================================
 // Student Number : S10274174G
 // Student Name : Brian Jose Nevill - Questions:2,3,5,7, Advanced Feature: Bulk Processing, Bonus Feature: Favourite Orders
-// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Restaurant Sub Menu, Bonus Feature: Display Total
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Display Total, Bonus Feature: Analytics
 //==========================================================
 
 using S10274174G_PRG2Assignment;
