@@ -8,15 +8,15 @@ namespace S10274174G_PRG2Assignment
 {
     internal class Favourite
     {
-        private string favoruiteName;
+        private string favouriteName;
         private string restuarantId;
         private List<OrderedFoodItem> items;
         private string specialRequest;
 
-        public string FavoruiteName
+        public string FavouriteName
         {
-            get { return favoruiteName; }
-            set { favoruiteName = value; }
+            get { return favouriteName; }
+            set { favouriteName = value; }
         }
         public string RestuarantId
         {
@@ -36,7 +36,7 @@ namespace S10274174G_PRG2Assignment
 
         public Favourite(string favouriteName, string restaurantId, string specialRequest)
         {
-            FavoruiteName = favouriteName;
+            FavouriteName = favouriteName;
             RestuarantId = restaurantId;
             Items = new List<OrderedFoodItem>();
             SpecialRequest = specialRequest;
