@@ -150,7 +150,7 @@ void SaveFavouritesToCsv()
         foreach (Favourite fav in customer.Favourites)
         {
             string custEmail = customer.EmailAdress;
-            string favouriteName = fav.FavoruiteName;
+            string favouriteName = fav.FavouriteName;
             string restaurantId = fav.RestuarantId;
 
             string items = "";
@@ -1224,7 +1224,7 @@ void FavouriteOrder()
     }
     Console.WriteLine("");
     Console.WriteLine("1.Add Favourite Order");
-    Console.WriteLine("2.Reorder Favouruite Order");
+    Console.WriteLine("2.Reorder Favourite Order");
     Console.WriteLine("3.Delete Favourite Order");
     Console.Write("Choose Option:");
     string opt = Console.ReadLine();
@@ -1235,7 +1235,7 @@ void FavouriteOrder()
             int num = 1;
             foreach (Favourite fav in customer.Favourites)
             {
-                Console.WriteLine($"{num}.{fav.FavoruiteName}");
+                Console.WriteLine($"{num}.{fav.FavouriteName}");
                 num += 1;
             }
             int chose;
@@ -1369,7 +1369,7 @@ void FavouriteOrder()
         }
         else
         {
-            Console.WriteLine("Custoemr has no favoruite orders.");
+            Console.WriteLine("Custoemr has no favourite orders.");
             return;
         }
     }
@@ -1386,7 +1386,7 @@ void FavouriteOrder()
         Console.WriteLine("================");
         for (int i = 0; i < customer.Favourites.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {customer.Favourites[i].FavoruiteName}");
+            Console.WriteLine($"{i + 1}. {customer.Favourites[i].FavouriteName}");
         }
 
         int choice;
@@ -1417,7 +1417,7 @@ void FavouriteOrder()
 
         while (true)
         {
-            Console.Write($"Confirm delete '{customer.Favourites[choice - 1].FavoruiteName}'? [Y/N]: ");
+            Console.Write($"Confirm delete '{customer.Favourites[choice - 1].FavouriteName}'? [Y/N]: ");
             string confirm = Console.ReadLine();
 
             if (confirm == "Y")
@@ -1514,7 +1514,7 @@ void FavouriteOrder()
 
         customer.Favourites.Add(fav);
 
-        Console.WriteLine($"Favourite order '{fav.FavoruiteName}' added successfully.");
+        Console.WriteLine($"Favourite order '{fav.FavouriteName}' added successfully.");
     }
 
     else
