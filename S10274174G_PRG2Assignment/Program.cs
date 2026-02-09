@@ -1,7 +1,7 @@
 ﻿//==========================================================
 // Student Number : S10274174G
-// Student Name : Brian Jose Nevill - Questions:2,3,5,7
-// Partner Name : Ong Cong Siang - Questions:1,4,6,8
+// Student Name : Brian Jose Nevill - Questions:2,3,5,7, Advanced Feature: Bulk Processing, Bonus Feature: Favourite Orders
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Restaurant Sub Menu, Bonus Feature: Display Total
 //==========================================================
 
 using S10274174G_PRG2Assignment;
@@ -49,46 +49,34 @@ do
     }
     else if (choice == "1")
     {
-        while (true)
+
+        // Student Name : Brian Jose Nevill - Basic Feature - 3
+
+        Console.WriteLine("All Restaurants and Menu Items");
+        Console.WriteLine("==============================");
+
+        foreach (Restaurant restaurant in restaurants.Values)
         {
-            Console.WriteLine("\nRestaurants");
-            Console.WriteLine("===========");
-            foreach (var r in restaurants.Values)
+            restaurant.DisplayMenus();
+
+            // Partner Name : Ong Cong Siang - Bonus Feature - Sub Menu
+            //-------------------------------------------------------------
+            Console.WriteLine("Drinks");
+            string[] drinkNames = { "Coke", "Green Tea", "Orange Juice" };
+            double[] drinkPrices = { 2.00, 1.50, 2.50 };
+
+            for (int i = 0; i < drinkNames.Length; i++)
             {
-                Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
+                Console.WriteLine($"- {drinkNames[i]}: Drink - ${drinkPrices[i]:0.00}");
             }
+            //-------------------------------------------------------------
 
-            Console.Write("Select Restaurant ID (0 to go back): ");
-            string input = Console.ReadLine().Trim();
-
-            if (input == "0")
-                break;
-
-            if (!restaurants.ContainsKey(input))
-            {
-                Console.WriteLine("Invalid Restaurant ID.");
-                continue;
-            }
-
-            Restaurant selected = restaurants[input];
-
-            Console.WriteLine($"\n{selected.RestaurantName} Menu:");
-            foreach (Menu menu in selected.Menus)
-            {
-                Console.WriteLine($"Menu: {menu.MenuName}");
-                foreach (FoodItem item in menu.FoodItems)
-                {
-                    Console.WriteLine(item.ToString());
-                }
-            }
-
-            Console.WriteLine("\nPress any key to return to the restaurant list...");
-            Console.ReadKey();
-            Console.Clear();
+            Console.WriteLine();
         }
     }
     else if (choice == "2")
     {
+        // Partner Name : Ong Cong Siang - Basic Feature - 1
         Console.WriteLine("All Orders");
         Console.WriteLine("==========");
         Console.WriteLine($"{"Order ID",-12}{"Customer",-14}{"Restaurant",-17}{"Delivery Date/Time",-22}{"Amount",-10}{"Status",-10}");
@@ -157,6 +145,8 @@ SaveOrdersToCsv(queueList, "queue.csv");
 SaveOrdersToCsv(refundList, "stack.csv");
 SaveFavouritesToCsv();
 
+
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void SaveFavouritesToCsv()
 {
     string data = "";
@@ -232,10 +222,11 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
 
 
 
-
+// Partner Name : Ong Cong Siang - Advanced Feature - Display Total
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
     const double DELIVERY_FEE = 5.00;
+    const double GRUBEROO_FEE_RATE = 0.3;
 
     double grandTotalOrders = 0;
     double grandTotalRefunds = 0;
@@ -250,77 +241,35 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 
         foreach (Order order in restaurant.Orders)
         {
-            // Successful orders
             if (order.OrderStatus == Order.STATUS_DELIVERED)
             {
-                // Remove delivery fee
                 restaurantOrderTotal += (order.OrderTotal - DELIVERY_FEE);
+
+                grandTotalOrders += order.OrderTotal;
             }
-            // Refunded orders
             else if (order.OrderStatus == Order.STATUS_CANCELLED
                   || order.OrderStatus == Order.STATUS_REJECTED)
             {
                 restaurantRefundTotal += order.OrderTotal;
+                grandTotalRefunds += order.OrderTotal;
             }
         }
 
         Console.WriteLine($"\nRestaurant: {restaurant.RestaurantName}");
-        Console.WriteLine($"Total Successful Orders: ${restaurantOrderTotal:0.00}");
+        Console.WriteLine($"Total Successful Orders (without delivery fee): ${restaurantOrderTotal:0.00}");
         Console.WriteLine($"Total Refunds: ${restaurantRefundTotal:0.00}");
-
-        grandTotalOrders += restaurantOrderTotal;
-        grandTotalRefunds += restaurantRefundTotal;
     }
 
     Console.WriteLine("\nOverall Summary");
     Console.WriteLine("===============");
-    Console.WriteLine($"Total Order Amount: ${grandTotalOrders:0.00}");
+    Console.WriteLine($"Total Order Amount (including delivery fees): ${grandTotalOrders:0.00}");
     Console.WriteLine($"Total Refunds: ${grandTotalRefunds:0.00}");
-    Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
+
+    double gruberooEarnings = (grandTotalOrders - grandTotalRefunds) * GRUBEROO_FEE_RATE;
+    Console.WriteLine($"Final Amount Gruberoo Earns (30% fee): ${gruberooEarnings:0.00}");
 }
 
-void RestaurantSubMenu(Dictionary<string, Restaurant> restaurants)
-{
-    while (true)
-    {
-        Console.WriteLine("\nRestaurants");
-        Console.WriteLine("===========");
-        foreach (var r in restaurants.Values)
-        {
-            Console.WriteLine($"{r.RestaurantId} - {r.RestaurantName}");
-        }
-
-        Console.Write("Select Restaurant ID (0 to go back): ");
-        string input = Console.ReadLine().Trim();
-
-        if (input == "0")
-            break;
-
-        if (!restaurants.ContainsKey(input))
-        {
-            Console.WriteLine("Invalid Restaurant ID.");
-            continue;
-        }
-
-        Restaurant selected = restaurants[input];
-
-        Console.WriteLine($"\n{selected.RestaurantName} Menu:");
-        foreach (Menu menu in selected.Menus)
-        {
-            Console.WriteLine($"Menu: {menu.MenuName}");
-            foreach (FoodItem item in menu.FoodItems)
-            {
-                Console.WriteLine(item.ToString());
-            }
-        }
-
-        Console.WriteLine("\nPress any key to return to the restaurant list...");
-        Console.ReadKey();
-        Console.Clear();
-    }
-}
-
-
+// Partner Name : Ong Cong Siang - Basic Feature - 4
 Dictionary<string, Restaurant> LoadRestaurants()
 {
     Dictionary<string, Restaurant> restaurants = new Dictionary<string, Restaurant>();
@@ -340,6 +289,7 @@ Dictionary<string, Restaurant> LoadRestaurants()
     return restaurants;
 }
 
+// Partner Name : Ong Cong Siang - Basic Feature - 4
 Dictionary<string, FoodItem> LoadFoodItems(Dictionary<string, Restaurant> restaurants)
 {
     Dictionary<string, FoodItem> foodItems = new Dictionary<string, FoodItem>();
@@ -388,6 +338,7 @@ Dictionary<string, FoodItem> LoadFoodItems(Dictionary<string, Restaurant> restau
     return foodItems;
 }
 
+// Student Name : Brian Jose Nevill - Basic Feature - 2
 Dictionary<string, Customer> LoadCustomer()
 {
     Dictionary<string, Customer> customers = new Dictionary<string, Customer>();
@@ -403,6 +354,7 @@ Dictionary<string, Customer> LoadCustomer()
 
 }
 
+// Student Name : Brian Jose Nevill - Basic Feature - 2
 Dictionary<int, Order> LoadOrders(Dictionary<string, Customer> customers, Dictionary<string, Restaurant> restaurants, Dictionary<string, FoodItem> foodItems)
 {
     Dictionary<int, Order> orders = new Dictionary<int, Order>();
@@ -489,7 +441,7 @@ void LoadFavouruite()
 }
 
 
-
+// Partner Name : Ong Cong Siang - Basic Feature - 8
 void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
 {
     Console.WriteLine("Delete Order");
@@ -538,7 +490,6 @@ void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
         Console.WriteLine(o.OrderId);
     }
 
-    // Order ID validation
     Console.Write("\nEnter Order ID: ");
     string orderIdInput = (Console.ReadLine() ?? "").Trim();
 
@@ -603,6 +554,8 @@ void DeleteOrder(List<Order> orderList, Stack<Order> refundStack)
     }
 }
 
+
+// Student Name : Brian Jose Nevill - Basic Feature - 5
 void CreateNewOrder()
 {
     Console.WriteLine("Create New Order");
@@ -748,6 +701,81 @@ void CreateNewOrder()
             Console.WriteLine("Invalid Option");
         }
     }
+
+    Console.WriteLine("\nWould you like to add drinks?");
+    Console.WriteLine("1. Yes");
+    Console.WriteLine("0. No");
+    Console.Write("Choice: ");
+    string drinkChoice = Console.ReadLine();
+
+    if (drinkChoice == "1")
+    {
+        string[] drinkNames = { "Coke", "Green Tea", "Orange Juice" };
+        double[] drinkPrices = { 2.00, 1.50, 2.50 };
+
+        while (true)
+        {
+            Console.WriteLine("\nDrinks Menu");
+            Console.WriteLine("===========");
+            for (int i = 0; i < drinkNames.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {drinkNames[i]} - ${drinkPrices[i]:0.00}");
+            }
+
+            Console.Write("Select drink number (0 to finish): ");
+            int drinkNum;
+
+            try
+            {
+                drinkNum = Convert.ToInt32(Console.ReadLine());
+            }
+            catch
+            {
+                Console.WriteLine("Please enter a valid number.");
+                continue;
+            }
+
+            if (drinkNum == 0)
+                break;
+
+            if (drinkNum < 1 || drinkNum > drinkNames.Length)
+            {
+                Console.WriteLine("Invalid drink selection.");
+                continue;
+            }
+
+            Console.Write("Enter quantity: ");
+            int drinkQty;
+
+            try
+            {
+                drinkQty = Convert.ToInt32(Console.ReadLine());
+            }
+            catch
+            {
+                Console.WriteLine("Quantity must be a number.");
+                continue;
+            }
+
+            if (drinkQty <= 0)
+            {
+                Console.WriteLine("Quantity must be greater than 0.");
+                continue;
+            }
+
+            orderedFoodItems.Add(
+                new OrderedFoodItem(
+                    drinkNames[drinkNum - 1],
+                    "Drink",
+                    drinkPrices[drinkNum - 1],
+                    drinkQty
+                )
+            );
+
+            Console.WriteLine("Drink added successfully.");
+        }
+    }
+
     double subtotal = 0;
     foreach (OrderedFoodItem item in orderedFoodItems)
     {
@@ -828,6 +856,8 @@ void CreateNewOrder()
     Console.WriteLine("");
 }
 
+
+// Student Name : Brian Jose Nevill - Basic Feature - 7
 void ModifyOrder()
 {
     Console.WriteLine("Modify Order");
@@ -1202,6 +1232,8 @@ void ModifyOrder()
     }
 }
 
+
+// Student Name : Brian Jose Nevill - Advanced Feature - Bulk Order Processing
 void BulkOrder()
 {
     Queue<Order> orderqueue = new Queue<Order>();
@@ -1209,7 +1241,7 @@ void BulkOrder()
     {
         foreach (Order order in restaurant.Orders)
         {
-            if (order.OrderStatus == "Pending" && order.DeliveryDateTime.Date ==  DateTime.Now.Date)
+            if (order.OrderStatus == "Pending" && order.DeliveryDateTime.Date == DateTime.Now.Date)
             {
                 orderqueue.Enqueue(order);
             }
@@ -1233,7 +1265,7 @@ void BulkOrder()
         else
         {
             order.OrderStatus = "Preparing";
-              preparingCount += 1;
+            preparingCount += 1;
         }
     }
     processedCount = rejectedCount + preparingCount;
@@ -1248,6 +1280,7 @@ void BulkOrder()
 
 }
 
+// Student Name : Brian Jose Nevill - Bonus Feature - Favourite Orders
 void FavouriteOrder()
 {
     Customer customer;
@@ -1437,7 +1470,7 @@ void FavouriteOrder()
             {
                 Console.Write("Please enter a number: ");
                 choice = Convert.ToInt32(Console.ReadLine());
-               
+
             }
             catch
             {
@@ -1555,7 +1588,7 @@ void FavouriteOrder()
 
 }
 
-
+// Partner Name : Ong Cong Siang - Basic Feature - 6
 void ProcessOrder()
 {
     Console.WriteLine("Process Order");
@@ -1660,5 +1693,89 @@ void ProcessOrder()
 
         orderQueue.Enqueue(order);
         Console.WriteLine("");
+    }
+}
+
+void DrinksSubMenu(Order order)
+{
+    while (true)
+    {
+        Console.WriteLine("\nDrinks Menu");
+        Console.WriteLine("===========");
+        Console.WriteLine("1. Coke ($2.00)");
+        Console.WriteLine("2. Sprite ($2.00)");
+        Console.WriteLine("3. Iced Lemon Tea ($2.50)");
+        Console.WriteLine("4. Milo ($3.00)");
+        Console.WriteLine("5. Mineral Water ($1.50)");
+        Console.WriteLine("0. Back");
+
+        Console.Write("Choose drink: ");
+        string choice = Console.ReadLine();
+
+        string drinkName = "";
+        double price = 0;
+
+        if (choice == "1")
+        {
+            drinkName = "Coke";
+            price = 2.00;
+        }
+        else if (choice == "2")
+        {
+            drinkName = "Sprite";
+            price = 2.00;
+        }
+        else if (choice == "3")
+        {
+            drinkName = "Iced Lemon Tea";
+            price = 2.50;
+        }
+        else if (choice == "4")
+        {
+            drinkName = "Milo";
+            price = 3.00;
+        }
+        else if (choice == "5")
+        {
+            drinkName = "Mineral Water";
+            price = 1.50;
+        }
+        else if (choice == "0")
+        {
+            return;
+        }
+        else
+        {
+            Console.WriteLine("Invalid option.");
+            continue;
+        }
+
+        int qty;
+        while (true)
+        {
+            Console.Write("Enter quantity: ");
+            try
+            {
+                qty = Convert.ToInt32(Console.ReadLine());
+                if (qty <= 0)
+                {
+                    Console.WriteLine("Quantity must be more than 0.");
+                }
+                else
+                {
+                    break;
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Please enter a number.");
+            }
+        }
+
+        order.AddOrderedFoodItem(
+            new OrderedFoodItem(drinkName, "", price, qty)
+        );
+
+        Console.WriteLine($"{drinkName} x{qty} added to order.");
     }
 }
