@@ -1224,7 +1224,7 @@ void FavouriteOrder()
     }
     Console.WriteLine("");
     Console.WriteLine("1.Add Favourite Order");
-    Console.WriteLine("2.Reorder Favouruite Order");
+    Console.WriteLine("2.Reorder Favourite Order");
     Console.WriteLine("3.Delete Favourite Order");
     Console.Write("Choose Option:");
     string opt = Console.ReadLine();
