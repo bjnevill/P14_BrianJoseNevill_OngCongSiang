@@ -61,6 +61,8 @@ namespace S10274174G_PRG2Assignment
             Orders = new Queue<Order>();
         }
 
+        public List<Drink> Drinks { get; set; } = new List<Drink>();
+
         public void DisplayOrders()
         {
             foreach (Order order in Orders)
