@@ -1649,7 +1649,6 @@ void AnalyticsDashboard()
         return;
     }
 
-    // ----- Overall counters -----
     int totalOrders = 0;
     int deliveredCount = 0;
     int pendingCount = 0;
@@ -1657,36 +1656,29 @@ void AnalyticsDashboard()
     int cancelledCount = 0;
     int rejectedCount = 0;
 
-    // Avg order value (DELIVERED only, so it doesn't overlap refund totals)
     double deliveredTotalValue = 0;
 
-    // Item popularity (by qty, across ALL orders)
     Dictionary<string, int> itemQty = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-    // Peak times (by delivery hour, across ALL orders)
     Dictionary<int, int> deliveryHourCount = new Dictionary<int, int>();
 
-    // Restaurant performance (counts + rates, not money)
     Dictionary<string, int> restTotal = new Dictionary<string, int>();
     Dictionary<string, int> restDelivered = new Dictionary<string, int>();
-    Dictionary<string, int> restRefunded = new Dictionary<string, int>(); // cancelled + rejected
+    Dictionary<string, int> restRefunded = new Dictionary<string, int>();
 
     foreach (Order o in orders.Values)
     {
         totalOrders++;
 
-        // status breakdown
         if (o.OrderStatus == Order.STATUS_DELIVERED) deliveredCount++;
         else if (o.OrderStatus == Order.STATUS_PENDING) pendingCount++;
         else if (o.OrderStatus == Order.STATUS_PREPARING) preparingCount++;
         else if (o.OrderStatus == Order.STATUS_CANCELLED) cancelledCount++;
         else if (o.OrderStatus == Order.STATUS_REJECTED) rejectedCount++;
 
-        // delivered average value (only)
         if (o.OrderStatus == Order.STATUS_DELIVERED)
             deliveredTotalValue += o.OrderTotal;
 
-        // item qty
         foreach (OrderedFoodItem item in o.OrderedFoodItems)
         {
             if (!itemQty.ContainsKey(item.ItemName))
@@ -1695,13 +1687,11 @@ void AnalyticsDashboard()
             itemQty[item.ItemName] += item.QtyOrdered;
         }
 
-        // peak delivery hour
         int hr = o.DeliveryDateTime.Hour;
         if (!deliveryHourCount.ContainsKey(hr))
             deliveryHourCount[hr] = 0;
         deliveryHourCount[hr]++;
 
-        // restaurant performance counts
         string rid = o.Restaurant.RestaurantId;
 
         if (!restTotal.ContainsKey(rid)) restTotal[rid] = 0;
@@ -1717,13 +1707,11 @@ void AnalyticsDashboard()
             restRefunded[rid]++;
     }
 
-    // ----- Derived metrics -----
     int refundedCount = cancelledCount + rejectedCount;
     double deliveredRate = totalOrders == 0 ? 0 : (deliveredCount * 100.0 / totalOrders);
     double refundRate = totalOrders == 0 ? 0 : (refundedCount * 100.0 / totalOrders);
     double avgDeliveredOrderValue = deliveredCount == 0 ? 0 : (deliveredTotalValue / deliveredCount);
 
-    // ----- Output: Status insight -----
     Console.WriteLine("\n1) Order Status Breakdown");
     Console.WriteLine("-------------------------");
     Console.WriteLine($"Total Orders : {totalOrders}");
@@ -1734,7 +1722,6 @@ void AnalyticsDashboard()
     Console.WriteLine($"Rejected     : {rejectedCount}");
     Console.WriteLine($"Refund Rate  : {refundRate:0.00}%  (Cancelled + Rejected)");
 
-    // ----- Output: Avg order value (delivered only) -----
     Console.WriteLine("\n2) Delivered Order Value Insight");
     Console.WriteLine("--------------------------------");
     if (deliveredCount == 0)
@@ -1742,7 +1729,6 @@ void AnalyticsDashboard()
     else
         Console.WriteLine($"Average Delivered Order Value: ${avgDeliveredOrderValue:0.00}");
 
-    // ----- Output: Top items -----
     Console.WriteLine("\n3) Top 5 Most Ordered Items (by quantity)");
     Console.WriteLine("-----------------------------------------");
     if (itemQty.Count == 0)
@@ -1759,7 +1745,6 @@ void AnalyticsDashboard()
         }
     }
 
-    // ----- Output: Peak hours -----
     Console.WriteLine("\n4) Peak Delivery Hours (Top 3)");
     Console.WriteLine("------------------------------");
     if (deliveryHourCount.Count == 0)
@@ -1774,10 +1759,8 @@ void AnalyticsDashboard()
         }
     }
 
-    // ----- Output: Restaurant leaderboard (rates, not money) -----
     Console.WriteLine("\n5) Restaurant Performance Leaderboard (by Delivered Rate)");
     Console.WriteLine("---------------------------------------------------------");
-    // show top 3 by delivered rate (min 1 order)
     var leaderboard = restTotal.Keys
         .Select(rid =>
         {
