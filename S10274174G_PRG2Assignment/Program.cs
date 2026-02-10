@@ -1,7 +1,7 @@
 ﻿//==========================================================
 // Student Number : S10274174G
 // Student Name : Brian Jose Nevill - Questions:2,3,5,7, Advanced Feature: Bulk Processing, Bonus Feature: Favourite Orders
-// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Restaurant Sub Menu, Bonus Feature: Display Total
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Display Total, Bonus Feature: Analytics
 //==========================================================
 
 using S10274174G_PRG2Assignment;
@@ -219,27 +219,27 @@ void SaveOrdersToCsv(List<Order> orderList, string filename)
 void DisplayTotals(Dictionary<string, Restaurant> restaurants)
 {
     const double DELIVERY_FEE = 5.00;
+    const double GRUBEROO_RATE = 0.30;
 
-    double grandTotalOrders = 0;
-    double grandTotalRefunds = 0;
+    double grandFoodTotal = 0;
+    double grandRefundTotal = 0;
+    double gruberooEarnings = 0;
 
     Console.WriteLine("Order Summary by Restaurant");
     Console.WriteLine("===========================");
 
     foreach (Restaurant restaurant in restaurants.Values)
     {
-        double restaurantOrderTotal = 0;
+        double restaurantFoodTotal = 0;
         double restaurantRefundTotal = 0;
 
         foreach (Order order in restaurant.Orders)
         {
-            // Successful orders
             if (order.OrderStatus == Order.STATUS_DELIVERED)
             {
-                // Remove delivery fee
-                restaurantOrderTotal += (order.OrderTotal - DELIVERY_FEE);
+                double foodAmount = order.OrderTotal - DELIVERY_FEE;
+                restaurantFoodTotal += foodAmount;
             }
-            // Refunded orders
             else if (order.OrderStatus == Order.STATUS_CANCELLED
                   || order.OrderStatus == Order.STATUS_REJECTED)
             {
@@ -247,19 +247,23 @@ void DisplayTotals(Dictionary<string, Restaurant> restaurants)
             }
         }
 
-        Console.WriteLine($"\nRestaurant: {restaurant.RestaurantName}");
-        Console.WriteLine($"Total Successful Orders: ${restaurantOrderTotal:0.00}");
-        Console.WriteLine($"Total Refunds: ${restaurantRefundTotal:0.00}");
+        double restaurantEarnings = restaurantFoodTotal * GRUBEROO_RATE;
 
-        grandTotalOrders += restaurantOrderTotal;
-        grandTotalRefunds += restaurantRefundTotal;
+        Console.WriteLine($"\nRestaurant: {restaurant.RestaurantName}");
+        Console.WriteLine($"Total Food Orders: ${restaurantFoodTotal:0.00}");
+        Console.WriteLine($"Total Refunds: ${restaurantRefundTotal:0.00}");
+        Console.WriteLine($"Gruberoo Earnings (30%): ${restaurantEarnings:0.00}");
+
+        grandFoodTotal += restaurantFoodTotal;
+        grandRefundTotal += restaurantRefundTotal;
+        gruberooEarnings += restaurantEarnings;
     }
 
     Console.WriteLine("\nOverall Summary");
     Console.WriteLine("===============");
-    Console.WriteLine($"Total Order Amount: ${grandTotalOrders:0.00}");
-    Console.WriteLine($"Total Refunds: ${grandTotalRefunds:0.00}");
-    Console.WriteLine($"Final Amount Gruberoo Earns: ${(grandTotalOrders - grandTotalRefunds):0.00}");
+    Console.WriteLine($"Total Food Order Amount: ${grandFoodTotal:0.00}");
+    Console.WriteLine($"Total Refunds: ${grandRefundTotal:0.00}");
+    Console.WriteLine($"Final Amount Gruberoo Earns: ${gruberooEarnings:0.00}");
 }
 
 
