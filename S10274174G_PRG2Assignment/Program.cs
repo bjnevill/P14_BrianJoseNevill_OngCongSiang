@@ -1,7 +1,7 @@
 ﻿//==========================================================
 // Student Number : S10274174G
 // Student Name : Brian Jose Nevill - Questions:2,3,5,7, Advanced Feature: Bulk Processing, Bonus Feature: Favourite Orders
-// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Restaurant Sub Menu, Bonus Feature: Display Total
+// Partner Name : Ong Cong Siang - Questions:1,4,6,8, Advanced Feature: Display Total, Bonus Feature: Analytics
 //==========================================================
 
 using S10274174G_PRG2Assignment;
@@ -702,7 +702,7 @@ void CreateNewOrder()
     foreach (OrderedFoodItem item in orderedFoodItems)
     {
         subtotal += item.CalculateSubTotal();
-    }
+    }       
     double total = subtotal + 5;
     Console.WriteLine("");
     Console.WriteLine($"Order total: ${subtotal.ToString("0.00")} + $5.00 (delivery) = ${total.ToString("0.00")}");
@@ -1358,7 +1358,7 @@ void FavouriteOrder()
             string line;
             using (StreamWriter sw = new StreamWriter("orders.csv", true))
             {
-                sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{items}");
+                sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{itemline}");
             }
 
 
