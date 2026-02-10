@@ -162,7 +162,7 @@ void SaveFavouritesToCsv()
             itemline = $"\"{items}\"";
 
             string specialRequest = fav.SpecialRequest;
-            if (specialRequest == "-")
+            if (specialRequest == "-" || specialRequest == null)
             {
                 specialRequest = "-";
             }
@@ -706,7 +706,7 @@ void CreateNewOrder()
     foreach (OrderedFoodItem item in orderedFoodItems)
     {
         subtotal += item.CalculateSubTotal();
-    }
+    }       
     double total = subtotal + 5;
     Console.WriteLine("");
     Console.WriteLine($"Order total: ${subtotal.ToString("0.00")} + $5.00 (delivery) = ${total.ToString("0.00")}");
@@ -775,7 +775,7 @@ void CreateNewOrder()
     string line;
     using (StreamWriter sw = new StreamWriter("orders.csv", true))
     {
-        sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{items}");
+        sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{itemline}");
     }
 
 
@@ -1362,7 +1362,7 @@ void FavouriteOrder()
             string line;
             using (StreamWriter sw = new StreamWriter("orders.csv", true))
             {
-                sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{items}");
+                sw.WriteLine($"{order.OrderId},{order.Customer.EmailAdress},{order.Restaurant.RestaurantId},{order.DeliveryDateTime.ToString("dd/MM/yyyy")},{order.DeliveryDateTime.ToString("HH:mm")},{order.DeliveryAddress},{order.OrderDateTime.ToString("dd/MM/yyyy HH:mm")},{total.ToString("0.00")},{order.OrderStatus},{itemline}");
             }
 
 
