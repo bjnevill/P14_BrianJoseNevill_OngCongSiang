@@ -1,7 +1,3 @@
-Ahhh ok — then you want a **proper README intro section**, not a “random fix note”.
-Here’s a clean, teacher-friendly README block you can paste near the top, **explaining what the system is and what it supports** (and it subtly shows you know what you’re doing).
-
----
 
 ## Gruberoo Food Delivery System
 
