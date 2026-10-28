@@ -43,7 +43,7 @@ Run from `src/Gruberoo`: input files are resolved relative to the working direct
 
 ## Data and privacy
 
-CSV identities and delivery addresses were replaced with clearly labelled demo values. Transaction amounts, status, dates and food line items were preserved. Student identifiers were removed from source comments, namespace and paths. See [privacy and provenance](docs/PRIVACY_AND_PROVENANCE.md) and [validation](docs/VALIDATION.md). Original D: files and Git history are preserved. This PR keeps the repository private; historical commits still need separate consideration before making it public.
+CSV identities and delivery addresses were replaced with clearly labelled demo values. Transaction amounts, status, dates and food line items were preserved. Student identifiers were removed from source comments, namespace and paths. See [privacy and provenance](docs/PRIVACY_AND_PROVENANCE.md) and [validation](docs/VALIDATION.md). Original D: files and Git history are preserved. The repository is public. Historical commits may still contain prior identifiers and sample identity fields; cleaning current files does not remove history.
 
 ## Limitations
 
