@@ -1,63 +1,50 @@
-# Gruberoo — Food Delivery Management System
+# Gruberoo Food Delivery Management System
 
-**Ngee Ann Polytechnic | Diploma in Data Science | Programming II | Team academic project (2026)**
+Team academic project Â· Ngee Ann Polytechnic Â· Programming II Â· Semester 2 folder, October 2025 coursework
 
-A C# console application modelling the operational workflows of a food-delivery service, including customers, restaurant menus, orders, refunds and reporting. Built as a **school assignment**, not a production service.
+## Operational problem
 
-## What this project demonstrates
+Model a food-delivery service's customer orders, restaurant menus, order lifecycle and refunds in a C# console application. The project provides practice in operational data handling and reconciliation rules.
 
-- **Object-oriented design:** separate classes for customers, restaurants, menus, food items, orders, special offers and saved favourites.
-- **Business process modelling:** order creation and lifecycle transitions, including preparation, delivery, cancellation and rejection.
-- **Data handling:** CSV-based inputs and persisted records for orders and related operations.
-- **Data structures:** lists, dictionaries, queues and stacks for tracking operational data.
-- **Business analytics:** reporting on order activity and key operational measures.
+## Methodology, ownership and tools
 
-## Features
+C# / .NET 8, object-oriented classes, dictionaries, queues, stacks and CSV persistence separate customers, restaurants, menus, food items, orders, offers and favourites.
 
-| Area | Functionality |
-| --- | --- |
-| Restaurant management | Load restaurant information, menus and food items |
-| Customer ordering | Create, view, modify and cancel orders |
-| Order processing | Process pending orders and update order statuses |
-| Refund handling | Record rejected/cancelled orders for refunds |
-| Favourites | Save and manage reusable orders |
-| Operational reporting | Summarise orders and delivery-related performance |
+Brian implemented assignment questions 2, 3, 5 and 7, bulk processing and favourite orders. The teammate implemented questions 1, 4, 6 and 8, totals and analytics. Original authorship comments are retained. The application is a joint project; the analytics feature is not claimed as Brian's individual work.
 
-**Business rules implemented in the assignment:** fulfilled orders contribute to sales reporting; cancelled or rejected orders are excluded from successful-order revenue; the case study specifies a 30% platform commission on eligible orders, excluding delivery charges.
+## Implemented features and findings
 
-## Repository structure
+The application loads case-study fixtures, creates and modifies orders, processes status changes, handles cancellations/refunds and produces operational totals. The assignment's reporting rules distinguish delivered orders from cancelled or rejected orders and apply a 30% platform commission to eligible amounts excluding delivery charges. These are coded case rules, not achieved commercial metrics.
+
+## Repository layout
 
 ```text
-S10274174G_PRG2Assignment.sln
-S10274174G_PRG2Assignment/
+Gruberoo.sln
+src/Gruberoo/
+  Gruberoo.csproj
   Program.cs
-  Customer.cs
-  Restaurant.cs
-  Menu.cs
-  FoodItem.cs
-  OrderedFoodItem.cs
-  Order.cs
-  SpecialOffer.cs
-  Favourite.cs
+  Customer.cs, Restaurant.cs, Menu.cs, FoodItem.cs
+  Order.cs, OrderedFoodItem.cs, SpecialOffer.cs, Favourite.cs
   *.csv
+docs/  # privacy, provenance and validation notes
 ```
 
-## Running locally
+## Run locally
 
-1. Clone the repository.
-2. Open `S10274174G_PRG2Assignment.sln` in Visual Studio with the required .NET/C# tooling.
-3. Run the console project. The supplied CSV files are sample assignment data.
+Install the .NET 8 SDK, or a newer SDK capable of targeting .NET 8 with the .NET 8 runtime available.
 
-The exact .NET SDK and runtime requirements should be checked against the included `.csproj` file before building from a command line.
+```powershell
+dotnet build Gruberoo.sln
+Set-Location src/Gruberoo
+dotnet run --project Gruberoo.csproj
+```
 
-## Context and limitations
+Run from `src/Gruberoo`: input files are resolved relative to the working directory. Menu option `0` exits. The application can write order/favourite/refund files; use a disposable clone when exploring it.
 
-This is a **collaborative student assignment**, developed with a teammate; it is presented as a team project, not solely individual work. It demonstrates educational implementation of order-handling workflows, rather than production-scale reliability or deployed infrastructure.
+## Data and privacy
 
-## Relevant skills
+CSV identities and delivery addresses were replaced with clearly labelled demo values. Transaction amounts, status, dates and food line items were preserved. Student identifiers were removed from source comments, namespace and paths. See [privacy and provenance](docs/PRIVACY_AND_PROVENANCE.md) and [validation](docs/VALIDATION.md). Original D: files and Git history are preserved. This PR keeps the repository private; historical commits still need separate consideration before making it public.
 
-`C#` · `Object-Oriented Programming` · `CSV Data Handling` · `Business Process Modelling` · `Operational Reporting`
+## Limitations
 
----
-
-*For other analytics and finance-oriented coursework, see the owner's GitHub profile as additional repositories are published.*
+This is an educational console program with local CSV storage, not a deployed service. There is no production authentication, transactional database or comprehensive automated test suite. Build success and a startup smoke check do not establish correctness of every order/refund edge case.

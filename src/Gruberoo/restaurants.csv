@@ -1,0 +1,16 @@
+RestaurantId,Name,Email
+R001,Grill House,restaurant-grillhouse@example.invalid
+R002,Noodle Palace,restaurant-noodlepalace@example.invalid
+R003,Bento Express,restaurant-bentoexpress@example.invalid
+R004,Pizza Corner,restaurant-pizzacorner@example.invalid
+R005,Salad Bar,restaurant-saladbar@example.invalid
+R006,Sushi Zen,restaurant-sushizen@example.invalid
+R007,Burger Barn,restaurant-burgerbarn@example.invalid
+R008,Taco Town,restaurant-tacotown@example.invalid
+R009,Pasta Pronto,restaurant-pastapronto@example.invalid
+R010,Steak Station,restaurant-steakstation@example.invalid
+R011,Curry Corner,restaurant-currycorner@example.invalid
+R012,Dim Sum Den,restaurant-dimsumden@example.invalid
+R013,Waffle World,restaurant-waffleworld@example.invalid
+R014,Soup Shack,restaurant-soupshack@example.invalid
+R015,Donut Delight,restaurant-donutdelight@example.invalid
