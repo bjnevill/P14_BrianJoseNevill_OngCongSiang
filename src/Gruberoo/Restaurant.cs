@@ -1,5 +1,4 @@
-﻿//==========================================================
-// Student Number : S10274174G
+//==========================================================
 // Student Name : Brian Jose Nevill
 // Partner Name : Ong Cong Siang
 //==========================================================
@@ -10,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace S10274174G_PRG2Assignment
+namespace Gruberoo
 {
     internal class Restaurant
     {
