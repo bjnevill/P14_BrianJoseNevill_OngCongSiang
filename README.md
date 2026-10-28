@@ -1,54 +1,63 @@
+# Gruberoo — Food Delivery Management System
 
-## Gruberoo Food Delivery System
+**Ngee Ann Polytechnic | Diploma in Data Science | Programming II | Team academic project (2026)**
 
-The Gruberoo Food Delivery System is a console-based application developed in C# to simulate the core operations of an online food delivery platform. The system supports restaurant management, customer ordering, order processing, refunds, and business analytics using appropriate data structures such as dictionaries, lists, queues, and stacks.
+A C# console application modelling the operational workflows of a food-delivery service, including customers, restaurant menus, orders, refunds and reporting. Built as a **school assignment**, not a production service.
 
-### Key Features
+## What this project demonstrates
 
-* **Restaurant & Menu Management**
+- **Object-oriented design:** separate classes for customers, restaurants, menus, food items, orders, special offers and saved favourites.
+- **Business process modelling:** order creation and lifecycle transitions, including preparation, delivery, cancellation and rejection.
+- **Data handling:** CSV-based inputs and persisted records for orders and related operations.
+- **Data structures:** lists, dictionaries, queues and stacks for tracking operational data.
+- **Business analytics:** reporting on order activity and key operational measures.
 
-  * Load restaurants and their menus from CSV files
-  * Each restaurant maintains at least one menu with multiple food items
-  * Food items are uniquely identified by their item names
+## Features
 
-* **Customer & Order Management**
+| Area | Functionality |
+| --- | --- |
+| Restaurant management | Load restaurant information, menus and food items |
+| Customer ordering | Create, view, modify and cancel orders |
+| Order processing | Process pending orders and update order statuses |
+| Refund handling | Record rejected/cancelled orders for refunds |
+| Favourites | Save and manage reusable orders |
+| Operational reporting | Summarise orders and delivery-related performance |
 
-  * Load customers and historical orders at startup
-  * Create, modify, and delete orders
-  * Orders progress through defined statuses: Pending, Preparing, Delivered, Cancelled, and Rejected
-  * Delivery fees are applied consistently per order
+**Business rules implemented in the assignment:** fulfilled orders contribute to sales reporting; cancelled or rejected orders are excluded from successful-order revenue; the case study specifies a 30% platform commission on eligible orders, excluding delivery charges.
 
-* **Order Processing**
+## Repository structure
 
-  * Manual order processing per restaurant using a queue
-  * Bulk processing of pending orders for the current day
-  * Refund handling using a stack for cancelled or rejected orders
+```text
+S10274174G_PRG2Assignment.sln
+S10274174G_PRG2Assignment/
+  Program.cs
+  Customer.cs
+  Restaurant.cs
+  Menu.cs
+  FoodItem.cs
+  OrderedFoodItem.cs
+  Order.cs
+  SpecialOffer.cs
+  Favourite.cs
+  *.csv
+```
 
-* **Data Persistence**
+## Running locally
 
-  * On exit, pending and preparing orders are saved to `queue.csv`
-  * Refunded orders are saved to `stack.csv`
-  * Favourite orders are saved and reloaded from `favourite.csv`
-  * CSV formatting ensures consistent structure and safe reloading
+1. Clone the repository.
+2. Open `S10274174G_PRG2Assignment.sln` in Visual Studio with the required .NET/C# tooling.
+3. Run the console project. The supplied CSV files are sample assignment data.
 
-* **Favourite Orders (Bonus Feature)**
+The exact .NET SDK and runtime requirements should be checked against the included `.csproj` file before building from a command line.
 
-  * Customers can save previous orders as favourites
-  * Favourite orders can be reordered or deleted
-  * Special requests and item quantities are preserved
+## Context and limitations
 
-* **Analytics Dashboard (Bonus Feature)**
+This is a **collaborative student assignment**, developed with a teammate; it is presented as a team project, not solely individual work. It demonstrates educational implementation of order-handling workflows, rather than production-scale reliability or deployed infrastructure.
 
-  * Displays order status breakdown and refund rates
-  * Computes average delivered order value
-  * Identifies top-ordered food items
-  * Shows peak delivery hours
-  * Ranks restaurants based on delivery success rate
+## Relevant skills
 
-### Business Logic
+`C#` · `Object-Oriented Programming` · `CSV Data Handling` · `Business Process Modelling` · `Operational Reporting`
 
-* Only **Delivered** orders contribute to revenue calculations
-* Cancelled and rejected orders are treated as refunds
-* Gruberoo earns **30% commission** from successfully delivered food orders (excluding delivery fees)
-* Refunds do not contribute to Gruberoo earnings
+---
 
+*For other analytics and finance-oriented coursework, see the owner's GitHub profile as additional repositories are published.*
